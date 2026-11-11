@@ -2,6 +2,8 @@
 
 A standalone, static PDF toolbox built with Astro and TypeScript for Cloudflare Pages or GitHub Pages. **PDF Room is a working name**, and `pdf-local` is the independent project directory/repository name. A domain has not been selected or registered by this project.
 
+Live GitHub Pages preview: **https://oreoo1224.github.io/pdf-local/**. Deployment and HTTPS responses were verified on 2026-11-11. Interactive browser and mobile acceptance checks remain separate from deployment verification.
+
 한국어: 기존 Number-select와 분리된 신규 프로젝트입니다. 파일을 서버에 올리지 않고 브라우저 안에서 처리하며, 결과는 사용자의 기기로 다운로드합니다. 영어·한국어·스페인어·일본어를 지원합니다. 배포 전 실제 도메인과 운영자 연락처를 설정하세요.
 
 ## What this version includes
@@ -75,7 +77,7 @@ Browser memory varies by device. Safeguards bound file count, total input bytes,
 
 Current UI limits: 30 input files, 50 MB per file and 100 MB total; the page editor accepts up to 200 pages per document. PDF-to-image exports accept at most 100 selected pages per task. Source images are limited to 40 megapixels, rendered canvases to 24 megapixels, and accumulated ZIP contents to 150 MB. Lower limits may still be necessary on a memory-constrained phone. JPEG EXIF rotation and mirroring are honored without recompressing source photos.
 
-Verification for this initial repository: automated PDF and localization tests, Astro/TypeScript diagnostics, and production-output route/metadata/link checks have passed. Browser UI, Canvas/PDF.js rendering, mobile downloads and final-origin security headers still need browser verification; no live deployment has been performed. The supplied design reference is a generated concept, not a screenshot of a running website.
+Verification for this initial repository: 94 automated PDF, localization and deploy-path tests, Astro/TypeScript diagnostics, and production-output route/metadata/link checks have passed. GitHub Pages deployment succeeded, and HTTP checks passed for all four language home pages, all four English tools, scripts, the PDF worker and SEO files. Browser UI, Canvas/PDF.js rendering and mobile downloads still need browser verification. The supplied design reference is a generated concept, not a screenshot of the running website.
 
 Editing a PDF changes its bytes and can invalidate existing digital signatures. Preservation of interactive forms, bookmarks, attachments, accessibility structure, and other document-level features is not guaranteed. Keep the original and review important output before relying on it.
 
@@ -106,7 +108,7 @@ GitHub Pages must be enabled separately from uploading source code. In **this re
 
 After Pages is enabled, open **Actions → Deploy GitHub Pages → Run workflow** for `main` if the initial push did not start a run. Subsequent pushes to `main` trigger that deployment workflow. The workflow installs the lockfile, runs checks/tests, builds, verifies the output, and deploys `dist` with GitHub's official Pages actions. It uses the configured Pages origin and base path, so worker assets, localized routes and downloads work under a project URL. It does not need a personal token or a paid conversion service.
 
-The expected project URL for this repository is **https://oreoo1224.github.io/pdf-local/**. This is an expected address, **not confirmation that deployment has succeeded**. Confirm the workflow's `github-pages` environment URL, terminal deployment result and an HTTPS visit before reporting it as live. Configure the real operator email as repository variable `CONTACT_EMAIL` before public launch, then rerun the workflow. Review the browser-verification checklist in [the launch guide](docs/LAUNCH.md).
+The deployed preview URL for this repository is **https://oreoo1224.github.io/pdf-local/**. Workflow run [42969925712](https://github.com/oreoo1224/pdf-local/actions/runs/42969925712), attempt 2, completed successfully, and the site served HTTP 200 over HTTPS. Configure the real operator email as repository variable `CONTACT_EMAIL` before general public launch, then rerun the workflow. Review the browser-verification checklist in [the launch guide](docs/LAUNCH.md).
 
 For a local production-output check of the same subpath setup:
 
