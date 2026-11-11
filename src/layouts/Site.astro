@@ -31,7 +31,7 @@ const schema = application ? {
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:site_name" content="PDFEditNow" />
+    <meta property="og:site_name" content="PDFEditGo" />
     {canonical && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary" />
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g,'\\u003c')} />}
@@ -39,7 +39,7 @@ const schema = application ? {
   <body>
     <a class="skip" href="#main">{d.skipToContent}</a>
     <header class="site-header">
-      <a class="brand" href={homeHref}><Icon name="logo" size={34} />PDFEditNow</a>
+      <a class="brand" href={homeHref}><Icon name="logo" size={34} />PDFEditGo</a>
       <nav class="header-right" aria-label={d.navTools}>
         <a href={`${homeHref}#tools`}>{d.navTools}</a>
         <LanguageMenu locale={locale} route={route} />
@@ -47,7 +47,7 @@ const schema = application ? {
     </header>
     <main id="main"><slot /></main>
     <footer class="site-footer">
-      <span>© {new Date().getFullYear()} PDFEditNow</span>
+      <span>© {new Date().getFullYear()} PDFEditGo</span>
       <nav class="footer-links" aria-label="Information">
         {(['about','privacy','terms','contact'] as const).map(slug => <a href={sitePath(localePath(locale,slug))}>{d[slug]}</a>)}
       </nav>

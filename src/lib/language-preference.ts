@@ -1,7 +1,7 @@
 import { locales, type Locale } from './i18n';
 
-export const LANGUAGE_STORAGE_KEY = 'pdfeditnow-language';
-export const LEGACY_LANGUAGE_STORAGE_KEY = 'pdfroom-language';
+export const LANGUAGE_STORAGE_KEY = 'pdfeditgo-language';
+export const LEGACY_LANGUAGE_STORAGE_KEYS = ['pdfeditnow-language', 'pdfroom-language'] as const;
 
 const isLocale = (value: unknown): value is Locale =>
   typeof value === 'string' && (locales as readonly string[]).includes(value);
@@ -26,15 +26,20 @@ export function resolvePreferredLocale(
   return 'en';
 }
 
-/** Read the renamed preference first, retaining earlier users' explicit choices. */
+/** Keep the newest explicit choice and migrate earlier brand keys when possible. */
 export function readSavedLanguage(
-  storage: Pick<Storage, 'getItem'> | undefined,
+  storage: (Pick<Storage, 'getItem'> & Partial<Pick<Storage, 'setItem'>>) | undefined,
 ): Locale | null {
   try {
     const current = storage?.getItem(LANGUAGE_STORAGE_KEY);
     if (isLocale(current)) return current;
-    const legacy = storage?.getItem(LEGACY_LANGUAGE_STORAGE_KEY);
-    return isLocale(legacy) ? legacy : null;
+    for (const key of LEGACY_LANGUAGE_STORAGE_KEYS) {
+      const legacy = storage?.getItem(key);
+      if (!isLocale(legacy)) continue;
+      if (storage?.setItem) saveLanguage({ setItem: storage.setItem.bind(storage) }, legacy);
+      return legacy;
+    }
+    return null;
   } catch {
     return null;
   }

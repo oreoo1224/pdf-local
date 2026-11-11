@@ -15,3 +15,7 @@ await mkdir('public/office', {recursive:true});
 for(const file of ['docx_parser_bg.wasm','pptx_parser_bg.wasm']) {
   await cp(join('node_modules/@silurus/ooxml/dist',file),join('public/office',file));
 }
+await mkdir('public/hangul',{recursive:true});
+await cp('node_modules/@rhwp/core/rhwp_bg.wasm','public/hangul/rhwp_bg.wasm');
+await writeFile('public/licenses/rhwp-core.txt',await readFile('node_modules/@rhwp/core/LICENSE'));
+await cp('node_modules/@rhwp/core/notices','public/licenses/rhwp-notices',{recursive:true});

@@ -7,13 +7,16 @@ let fontPromise: Promise<void> | undefined;
 async function loadLocalFonts(): Promise<void> {
   if (typeof FontFace === 'undefined' || !document.fonts) return;
   fontPromise ??= (async () => {
+    const existing=Array.from(document.fonts).filter(face=>face.status==='loaded').map(face=>face.family.replace(/["']/g,''));
+    const families=['Noto Sans KR','Noto Serif KR'].filter(family=>!existing.includes(family));
+    if(!families.length)return;
     const response = await fetch(`${import.meta.env.BASE_URL}fonts/NotoSansKR.ttf`);
     if (!response.ok) throw new OfficeToolError('officeRender');
     const bytes = await response.arrayBuffer();
     // The renderer's regional fallback chains include these families. The
     // second alias substitutes a sans face for an unavailable CJK serif face;
-    // the trial UI clearly discloses font/layout differences.
-    for (const family of ['Noto Sans KR', 'Noto Serif KR']) {
+    // the interface clearly discloses font/layout differences.
+    for (const family of families) {
       const face = new FontFace(family, bytes, { weight: '100 900' });
       await face.load();
       document.fonts.add(face);

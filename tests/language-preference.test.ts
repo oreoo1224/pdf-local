@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { locales, type Locale } from '../src/lib/i18n';
 import {
-  LANGUAGE_STORAGE_KEY, LEGACY_LANGUAGE_STORAGE_KEY,
+  LANGUAGE_STORAGE_KEY, LEGACY_LANGUAGE_STORAGE_KEYS,
   resolvePreferredLocale, readSavedLanguage, saveLanguage,
 } from '../src/lib/language-preference';
 
@@ -67,23 +67,65 @@ describe('browser language selection', () => {
 });
 
 describe('optional language preference storage', () => {
-  it('uses the new preference before the earlier brand key', () => {
-    const storage = memoryStorage({ [LANGUAGE_STORAGE_KEY]: 'en', [LEGACY_LANGUAGE_STORAGE_KEY]: 'ko' });
+  const [previousBrandKey, originalBrandKey] = LEGACY_LANGUAGE_STORAGE_KEYS;
+
+  it('uses the PDFEditGo preference before either earlier brand key', () => {
+    const storage = memoryStorage({ [LANGUAGE_STORAGE_KEY]: 'en', [previousBrandKey]: 'ko', [originalBrandKey]: 'es' });
     expect(readSavedLanguage(storage)).toBe('en');
-    expect(storage.getItem).not.toHaveBeenCalledWith(LEGACY_LANGUAGE_STORAGE_KEY);
+    for (const key of LEGACY_LANGUAGE_STORAGE_KEYS) expect(storage.getItem).not.toHaveBeenCalledWith(key);
+    expect(storage.setItem).not.toHaveBeenCalled();
   });
 
-  it.each(locales)('retains a legacy %s choice after the rename', locale => {
-    expect(readSavedLanguage(memoryStorage({ [LEGACY_LANGUAGE_STORAGE_KEY]: locale }))).toBe(locale);
+  describe.each(LEGACY_LANGUAGE_STORAGE_KEYS)('migration from %s', key => {
+    it.each(locales)('retains and migrates an explicit %s choice', locale => {
+      const storage = memoryStorage({ [key]: locale });
+      expect(readSavedLanguage(storage)).toBe(locale);
+      expect(storage.setItem).toHaveBeenCalledExactlyOnceWith('pdfeditgo-language', locale);
+      expect(storage.getItem(key)).toBe(locale);
+      expect(readSavedLanguage(storage)).toBe(locale);
+      expect(storage.setItem).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the migrated manual choice ahead of browser languages and behind a URL choice', () => {
+      const storage = memoryStorage({ [key]: 'en' });
+      const saved = readSavedLanguage(storage);
+      expect(resolvePreferredLocale(saved, ['ko-KR', 'ja-JP'])).toBe('en');
+      expect(resolvePreferredLocale(saved, ['ko-KR', 'ja-JP'], 'es')).toBe('es');
+      expect(storage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en');
+    });
   });
 
-  it('falls back to the legacy key when the new value is invalid', () => {
-    expect(readSavedLanguage(memoryStorage({ [LANGUAGE_STORAGE_KEY]: 'ko-KR', [LEGACY_LANGUAGE_STORAGE_KEY]: 'es' }))).toBe('es');
+  it('prefers the most recent brand choice when both old keys exist', () => {
+    const storage = memoryStorage({ [previousBrandKey]: 'ja', [originalBrandKey]: 'ko' });
+    expect(readSavedLanguage(storage)).toBe('ja');
+    expect(storage.getItem).not.toHaveBeenCalledWith(originalBrandKey);
+    expect(storage.setItem).toHaveBeenCalledExactlyOnceWith(LANGUAGE_STORAGE_KEY, 'ja');
+  });
+
+  it('skips invalid newer values and migrates a valid earlier manual choice', () => {
+    const storage = memoryStorage({ [LANGUAGE_STORAGE_KEY]: 'ko-KR', [previousBrandKey]: 'KO', [originalBrandKey]: 'es' });
+    expect(readSavedLanguage(storage)).toBe('es');
+    expect(storage.setItem).toHaveBeenCalledExactlyOnceWith(LANGUAGE_STORAGE_KEY, 'es');
   });
 
   it('does not use malformed stored preferences', () => {
-    expect(readSavedLanguage(memoryStorage({ [LANGUAGE_STORAGE_KEY]: 'KO', [LEGACY_LANGUAGE_STORAGE_KEY]: 'fr' }))).toBeNull();
+    const storage = memoryStorage({ [LANGUAGE_STORAGE_KEY]: 'KO', [previousBrandKey]: 'fr', [originalBrandKey]: ' es ' });
+    expect(readSavedLanguage(storage)).toBeNull();
+    expect(storage.setItem).not.toHaveBeenCalled();
     expect(readSavedLanguage(memoryStorage())).toBeNull();
+  });
+
+  it('does not persist an automatic browser choice or an explicit URL request', () => {
+    const storage = memoryStorage();
+    expect(resolvePreferredLocale(readSavedLanguage(storage), ['ko-KR'])).toBe('ko');
+    expect(resolvePreferredLocale(readSavedLanguage(storage), ['ko-KR'], 'ja')).toBe('ja');
+    expect(storage.setItem).not.toHaveBeenCalled();
+  });
+
+  it('retains the manual choice when migration writes are blocked or unavailable', () => {
+    const getItem = (key: string) => key === previousBrandKey ? 'ja' : null;
+    expect(readSavedLanguage({ getItem })).toBe('ja');
+    expect(readSavedLanguage({ getItem, setItem: () => { throw new Error('Storage full'); } })).toBe('ja');
   });
 
   it('continues without storage or when access is blocked', () => {

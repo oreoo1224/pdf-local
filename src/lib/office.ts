@@ -51,7 +51,7 @@ export async function officeToPdfWithRenderer(
     const indices = parsePageRange(options.range, source.pageCount);
     if (indices.length > MAX_PAGES) throw new OfficeToolError('officeLimit');
     const output = await PDFDocument.create();
-    output.setProducer('PDFEditNow — browser-local Office trial');
+    output.setProducer('PDFEditGo — browser-local document conversion');
     let accumulatedBytes = 0;
     for (let position = 0; position < indices.length; position++) {
       const index = indices[position]!;

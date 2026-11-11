@@ -44,7 +44,7 @@ function initialize(root: HTMLElement) {
   const isOffice = tool === 'word-to-pdf' || tool === 'ppt-to-pdf';
   const officeKind = tool === 'word-to-pdf' ? 'docx' : 'pptx';
   const multi = isImage || tool === 'merge-pdf';
-  let files: Array<{ file: File; count: number; thumbnail?: string }> = [];
+  let files: Array<{ file: File; count: number; thumbnail?: string; format?: string }> = [];
   let pages: Array<{ index: number; rotation: number; url?: string }> = [];
   const selected = new Set<number>();
   const deleted = new Set<number>();
@@ -161,7 +161,7 @@ function initialize(root: HTMLElement) {
       const info = document.createElement('div'); info.className = 'file-info';
       const name = document.createElement('div'); name.className = 'file-name'; name.textContent = entry.file.name;
       const detail = document.createElement('div'); detail.className = 'file-detail';
-      detail.textContent = `${sizeLabel(entry.file.size)}${isOffice?` · ${officeKind.toUpperCase()}`:isImage ? '' : ` · ${entry.count} ${d.pages}`}`;
+      detail.textContent = `${sizeLabel(entry.file.size)}${isOffice?` · ${(entry.format||officeKind).toUpperCase()}`:isImage ? '' : ` · ${entry.count} ${d.pages}`}`;
       info.append(name, detail); li.append(info);
       const controls = document.createElement('div'); controls.className = 'file-controls';
       if (multi) controls.append(
@@ -262,9 +262,15 @@ function initialize(root: HTMLElement) {
       for (let i=0;i<incoming.length;i++) {
         const file = incoming[i]!;
         if (isOffice) {
-          const {validateOfficeFile}=await import('./office');
-          await validateOfficeFile(file,officeKind);
-          accepted.push({file,count:0});
+          if(tool==='word-to-pdf'){
+            const {validateWordFile}=await import('./word');
+            const format=await validateWordFile(file);
+            accepted.push({file,count:0,format});
+          }else{
+            const {validateOfficeFile}=await import('./office');
+            await validateOfficeFile(file,'pptx');
+            accepted.push({file,count:0,format:'pptx'});
+          }
         } else if (isImage) {
           await engine.validateImageFile(file);
           accepted.push({file,count:1});
@@ -330,11 +336,14 @@ function initialize(root: HTMLElement) {
         },progress);name='images.pdf';
       } else if(isOffice) {
         get('progress-text').textContent=d.officeLoading;
-        const {officeToPdf}=await import('./office');
-        const output=await officeToPdf(files[0]!.file,officeKind,{
+        const options={
           scale:Number(get<HTMLSelectElement>('office-resolution').value),
           range:get<HTMLInputElement>('page-range').value,
-        },progress);blob=output.blob;name=output.name;
+        };
+        const output=tool==='word-to-pdf'
+          ?await (await import('./word')).wordToPdf(files[0]!.file,options,progress)
+          :await (await import('./office')).officeToPdf(files[0]!.file,'pptx',options,progress);
+        blob=output.blob;name=output.name;
       } else {
         const {pdfToImages}=await import('./pdf-render');
         const output=await pdfToImages(files[0]!.file,{

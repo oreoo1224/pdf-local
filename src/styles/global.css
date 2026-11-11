@@ -140,7 +140,7 @@ h3 {
   justify-content:center;
   text-align:center;
   gap:8px;
-  padding:20px 8px 12px;
+  padding:12px 8px;
   border:2px solid var(--border);
   border-radius:15px;
   color:#101b34;
@@ -164,6 +164,11 @@ h3 {
   flex-shrink:0
 }
 .tool-name {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:40px;
   font-size:16px;
   font-weight:750;
   line-height:1.25;
@@ -176,19 +181,6 @@ h3 {
   min-height:30px;
   max-width:100%;
   overflow-wrap:anywhere
-}
-.tool-trial {
-  position:absolute;
-  top:6px;
-  right:6px;
-  padding:2px 5px;
-  border:1px solid #cbdaf4;
-  border-radius:5px;
-  background:#f5f8ff;
-  color:#3f5d8f;
-  font-size:9px;
-  font-weight:650;
-  line-height:1.2
 }
 .upload-panel {
   border:2px dashed #b9ccea;
@@ -605,10 +597,16 @@ h3 {
     margin-bottom:14px
   }
   .tool-card {
-    flex:0 0 145px;
-    width:145px;
-    height:145px;
+    flex:0 0 160px;
+    width:160px;
+    height:160px;
+    padding:12px 6px;
+    gap:6px;
     scroll-snap-align:start
+  }
+  .tool-card svg {
+    width:32px;
+    height:32px
   }
 }
 @media(max-width:760px) {
@@ -648,20 +646,21 @@ h1 {
   margin-bottom:14px
 }
 .tool-card {
-  width:145px;
-  min-width:145px;
-  height:145px;
+  width:160px;
+  min-width:160px;
+  height:160px;
   aspect-ratio:1;
-  padding:20px 8px 12px;
-  gap:8px;
+  padding:12px 6px;
+  gap:6px;
   scroll-snap-align:start;
   border-radius:11px
 }
 .tool-card svg {
-  width:37px;
-  height:37px
+  width:32px;
+  height:32px
 }
 .tool-name {
+  min-height:38px;
   font-size:15px
 }
 .tool-short {

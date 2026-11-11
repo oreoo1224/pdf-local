@@ -9,7 +9,6 @@ const icons={ 'merge-pdf':'merge','organize-pdf':'organize','pdf-to-jpg':'image'
 ---
 <nav id="tools" class="tool-grid" aria-label={d.navTools}>
   {tools.map(tool => <a class="tool-card" href={sitePath(localePath(locale,tool))} aria-current={selected===tool?'page':undefined}>
-    {(tool==='word-to-pdf'||tool==='ppt-to-pdf') && <span class="tool-trial">{d.trialLabel}</span>}
     <Icon name={icons[tool]} size={40} />
     <span class="tool-name">{d.tools[tool].name}</span>
     <span class="tool-short">{d.tools[tool].short}</span>

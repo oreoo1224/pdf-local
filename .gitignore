@@ -12,5 +12,6 @@ playwright-report/
 test-results/
 /public/pdfjs/
 /public/office/
+/public/hangul/
 /public/licenses/
 

@@ -1,10 +1,10 @@
-# PDFEditNow
+# PDFEditGo
 
-A standalone, static PDF toolbox built with Astro and TypeScript for Cloudflare Pages or GitHub Pages. **PDFEditNow is the product name**, and `pdf-local` is the independent project directory/repository name. No custom domain has been connected by this project.
+A standalone, static PDF toolbox built with Astro and TypeScript for Cloudflare Pages or GitHub Pages. **PDFEditGo is the product name**, and `pdf-local` remains the independent project directory/repository name. The connected production domain is **https://pdfeditgo.com/**.
 
-Live GitHub Pages preview: **https://oreoo1224.github.io/pdf-local/**. Deployment and HTTPS responses were verified on 2026-11-11. Interactive browser and mobile acceptance checks remain separate from deployment verification.
+GitHub Pages is configured for `pdfeditgo.com`, enforced HTTPS, and a domain-root deployment (`SITE_BASE=/`). Confirm that the latest deployment serves the current build before treating a configuration change as a completed release. Interactive browser and mobile acceptance checks remain separate from deployment verification.
 
-한국어: 기존 Number-select와 분리된 신규 프로젝트입니다. 파일을 서버에 올리지 않고 브라우저 안에서 처리하며, 결과는 사용자의 기기로 다운로드합니다. 영어·한국어·스페인어·일본어를 지원합니다. 배포 전 실제 도메인과 운영자 연락처를 설정하세요.
+한국어: 기존 Number-select와 분리된 신규 프로젝트입니다. 파일을 서버에 올리지 않고 브라우저 안에서 처리하며, 결과는 사용자의 기기로 다운로드합니다. 영어·한국어·스페인어·일본어를 지원합니다. 연결된 운영 도메인은 https://pdfeditgo.com/ 입니다. 공개 운영 전 실제 운영자 연락처를 설정하세요.
 
 ## What this version includes
 
@@ -14,16 +14,16 @@ See the [generated design reference](docs/design-reference.png). It illustrates 
 
 | Tool | Processing |
 | --- | --- |
+| Word / Hangul to PDF | Detect a `.docx`, supported HWP 5.0 `.hwp`, or `.hwpx` file and use the matching local document engine to create an image-based PDF. |
+| PPT to PDF | Render `.pptx` slides locally and save them as an image-based PDF. |
 | Merge PDF | Combine PDF files in the chosen order. |
 | Image to PDF | Combine JPG/JPEG and PNG images with paper size, orientation, margins, and image-fit controls. |
 | PDF to Image | Export selected pages as JPG or PNG; download multiple pages in a ZIP. |
 | Organize PDF | Preview pages, reorder, rotate, remove, and extract selected pages or page ranges into a new PDF. |
-| Word to PDF — trial | Render simple `.docx` pages locally and save them as an image-based PDF. |
-| PPT to PDF — trial | Render simple `.pptx` slides locally and save them as an image-based PDF. |
 
 English is the fallback language. Korean, Spanish, and Japanese have their own statically generated URLs. On a first visit to the homepage, the browser’s preferred languages can select a supported language automatically. A manually chosen language is remembered and takes priority; explicit localized URLs are respected. This uses no IP-country lookup or geolocation API. Each tool has indexable HTML content, page metadata, related tools, and instructions. Policy and information pages are included.
 
-The Word and PPT converters are trial tools for basic documents. Their PDFs contain page images, so the output does not preserve selectable or searchable text. Fonts, pagination and complex layouts may differ from desktop Office. Older binary `.doc` and `.ppt` files are not supported.
+The first card combines Word and Hangul input; the second card handles PowerPoint. File signatures and internal package structure select the appropriate engine, rather than running every converter or trusting a filename alone. Document PDFs contain page images, so the output does not preserve selectable or searchable text. Fonts, pagination and complex layouts may differ from the original application. Older binary `.doc` and `.ppt`, HWP 3.x, and protected or encrypted HWP/HWPX inputs are not supported by the initial Hangul integration.
 
 This version does **not** include Excel conversion, OCR, editing existing PDF text, a separate image compressor/resizer/converter, accounts, a database, advertising, or analytics. Additional image tools are future work and should not be advertised as available before implementation.
 
@@ -62,7 +62,7 @@ tests/           Automated processing tests
 docs/LAUNCH.md   Deployment and public-launch checklist
 ```
 
-`src/lib/pdf.ts` handles PDF document operations. `src/lib/pdf-render.ts` handles PDF previews and PDF-to-image rendering. `src/lib/office.ts` provides the trial Word/PPT conversion path. UI code should not mix file contents into HTML; filenames must be inserted as text.
+`src/lib/pdf.ts` handles PDF document operations. `src/lib/pdf-render.ts` handles PDF previews and PDF-to-image rendering. `src/lib/office.ts` handles Word/PPT rendering and PDF assembly; `src/lib/hangul.ts` handles HWP/HWPX processing. The shared first-card flow dispatches to the matching engine. UI code should not mix file contents into HTML; filenames must be inserted as text.
 
 ## File privacy and runtime behavior
 
@@ -76,15 +76,15 @@ docs/LAUNCH.md   Deployment and public-launch checklist
 
 ## Supported inputs and practical limits
 
-The established tools target ordinary, unencrypted PDF documents and valid JPG/JPEG or PNG image files. Trial Office tools accept basic, unencrypted `.docx` and `.pptx` files. Encrypted, malformed, unsupported, or oversized input must produce an error instead of silently ignoring encryption or generating a misleading result.
+The tools target ordinary, unencrypted PDF documents, valid JPG/JPEG or PNG images, `.docx`, `.pptx`, supported HWP 5.0 `.hwp`, and `.hwpx` documents. The Word / Hangul and PPT cards are regular tools without trial badges. Document converters support the formats and limits described here; complex layouts may differ from Microsoft Office or Hancom output. Encrypted, malformed, unsupported, or oversized input must produce an error instead of silently ignoring encryption or generating a misleading result.
 
 Browser memory varies by device. Safeguards bound file count, total input bytes, page rendering, and canvas area; they are technical limits per operation, not a paid usage quota. Thumbnails and rendered pages should be processed sequentially, with document handles, object URLs, and temporary canvases released when no longer used. A browser may still terminate a tab under memory pressure.
 
 Current UI limits: 30 input files, 50 MB per file and 100 MB total; the page editor accepts up to 200 pages per document. PDF-to-image exports accept at most 100 selected pages per task. Source images are limited to 40 megapixels, rendered canvases to 24 megapixels, and accumulated ZIP contents to 150 MB. Lower limits may still be necessary on a memory-constrained phone. JPEG EXIF rotation and mirroring are honored without recompressing source photos.
 
-The Office trial has separate safeguards: one input file of at most 20 MB and at most 50 output pages or slides per task. Rendering proceeds sequentially and releases page images as they are embedded. These limits reduce memory pressure but cannot guarantee that every supported-size document will render on a phone. Documents with external relationships, including hyperlinks and externally linked images, templates or media, are rejected rather than requesting their resources. Complex Word pagination, SmartArt, charts, equations, custom fonts and other Office-specific features require representative-file testing; unsupported content must not be described as fully compatible.
+Document conversion has separate safeguards: one input file of at most 20 MB and at most 50 output pages or slides per task. Rendering proceeds sequentially and releases page images as they are embedded. These limits reduce memory pressure but cannot guarantee that every supported-size document will render on a phone. OOXML documents with external relationships, including hyperlinks and externally linked images, templates or media, are rejected rather than requesting their resources. HWP/HWPX protection, format and resource checks likewise reject unsupported input. Complex Word pagination, SmartArt, charts, equations, Hangul tables, custom fonts and other application-specific features require representative-file testing; unsupported content must not be described as fully compatible.
 
-Verification: 167 automated tests, Astro/TypeScript diagnostics, and production-output route/metadata/link checks passed. The Office suite includes the production PDF assembly pipeline with actual OOXML/WASM parsing and Node Canvas rendering: a one-page Word sample with text/table/picture and a two-slide landscape PPT sample with text/shapes/picture. The resulting PDFs were rasterized and visually checked, including Korean and Japanese text. These samples do not establish full Office fidelity. Browser Worker execution, interactive Office conversion/downloads and mobile use still need browser verification. The supplied design reference is a generated concept using the earlier working title, not a screenshot of the running website.
+Verification: 215 automated tests, Astro/TypeScript diagnostics, and exact production-domain route/metadata/link checks passed. The document suites exercise the production PDF assembly paths with actual OOXML/rhwp WebAssembly and Node Canvas rendering: a one-page Word sample, a two-slide landscape PPT sample, and own-generated HWP/HWPX samples with Korean/Japanese text, a table and a picture. The HWP and HWPX samples both produce matching one-page A4 PDFs; selecting the second page of a separate two-page HWPX is also covered. Resulting PDFs were rasterized and visually checked. These samples do not establish full Office or Hangul fidelity. Browser Worker execution, interactive document conversion/downloads and mobile use still need browser verification. The supplied design reference is a generated concept using the earlier working title, not a screenshot of the running website.
 
 Editing a PDF changes its bytes and can invalidate existing digital signatures. Preservation of interactive forms, bookmarks, attachments, accessibility structure, and other document-level features is not guaranteed. Keep the original and review important output before relying on it.
 
@@ -96,8 +96,8 @@ Copy `.env.example` to `.env` for local configuration, or set the relevant hosti
 
 | Variable | Purpose |
 | --- | --- |
-| `SITE_URL` | The actual production origin, such as the assigned Pages hostname or your final custom domain. Used for canonical URLs, language alternates, Open Graph URLs, sitemap, and robots references. |
-| `SITE_BASE` | Deployment path, normally `/`. A GitHub project site uses `/pdf-local/`; the GitHub Pages workflow obtains this from the repository's Pages configuration. Keep `SITE_URL` as the origin without this path. |
+| `SITE_URL` | `https://pdfeditgo.com` for the connected production domain. Used for canonical URLs, language alternates, Open Graph URLs, sitemap, and robots references. |
+| `SITE_BASE` | `/` for the connected custom domain. The GitHub Pages workflow obtains this from the repository's Pages configuration. Keep `SITE_URL` as the origin without this path. |
 | `CF_PAGES_URL` | Cloudflare's deployment URL; the build can use it as a fallback when `SITE_URL` is absent. Prefer a stable `SITE_URL` for the production site. |
 | `CONTACT_EMAIL` | A real public operator support address. Configure it before public launch; never enter a private credential. |
 
@@ -107,7 +107,7 @@ A production origin and operator email are not required to create the initial pr
 
 ## Independent repository
 
-Use a **new GitHub repository** for this folder. Do not copy another project's environment variables, credentials, Git remotes, source, or Supabase settings. No modification of Number-select is needed.
+The independent repository is [`oreoo1224/pdf-local`](https://github.com/oreoo1224/pdf-local). Keep this repository and its deployment separate from Number-select. Do not copy another project's environment variables, credentials, source, or Supabase settings.
 
 ## GitHub Pages
 
@@ -115,20 +115,22 @@ GitHub Pages must be enabled separately from uploading source code. In **this re
 
 After Pages is enabled, open **Actions → Deploy GitHub Pages → Run workflow** for `main` if the initial push did not start a run. Subsequent pushes to `main` trigger that deployment workflow. The workflow installs the lockfile, runs checks/tests, builds, verifies the output, and deploys `dist` with GitHub's official Pages actions. It uses the configured Pages origin and base path, so worker assets, localized routes and downloads work under a project URL. It does not need a personal token or a paid conversion service.
 
-The deployed preview URL for this repository is **https://oreoo1224.github.io/pdf-local/**. Workflow run [42969925712](https://github.com/oreoo1224/pdf-local/actions/runs/42969925712), attempt 2, completed successfully, and the site served HTTP 200 over HTTPS. Configure the real operator email as repository variable `CONTACT_EMAIL` before general public launch, then rerun the workflow. Review the browser-verification checklist in [the launch guide](docs/LAUNCH.md).
+The configured production address is **https://pdfeditgo.com/**. `actions/configure-pages` supplies `SITE_URL=https://pdfeditgo.com` and a root base path from the actual Pages configuration; the workflow does not hardcode the legacy project path. `public/CNAME` retains the chosen hostname in the static artifact. After deployment, verify the workflow result, HTTPS response, current tool UI and assets at this domain. Configure the real operator email as repository variable `CONTACT_EMAIL` before general public launch, then rerun the workflow. Review [the launch guide](docs/LAUNCH.md).
 
-For a local production-output check of the same subpath setup:
+For a local production-output check matching the connected domain:
 
 ```sh
-SITE_URL=https://oreoo1224.github.io SITE_BASE=/pdf-local/ npm run build
-SITE_URL=https://oreoo1224.github.io SITE_BASE=/pdf-local/ npm run check:build
+SITE_URL=https://pdfeditgo.com SITE_BASE=/ npm run build
+SITE_URL=https://pdfeditgo.com SITE_BASE=/ npm run check:build
 ```
 
-Use a single primary host for search indexing. If GitHub Pages is a temporary preview and Cloudflare/custom-domain hosting becomes production, update the origin/base, canonical URLs and hosting redirects instead of leaving duplicate sites independently indexed.
+The former project URL, `https://oreoo1224.github.io/pdf-local/`, is a legacy fallback only. If the custom domain is intentionally removed, the workflow can derive the project base from Pages again. A local fallback check uses `SITE_URL=https://oreoo1224.github.io SITE_BASE=/pdf-local/` for both commands; do not use those values for the connected custom domain.
+
+Use `https://pdfeditgo.com/` as the primary host for search indexing. For any later hosting migration, update the origin/base, canonical URLs and redirects together so they continue to describe the final production site.
 
 ## Cloudflare Pages
 
-Once the new repository exists, connect it in Cloudflare **Workers & Pages → Create → Pages → Connect to Git**. Select only the new repository and set:
+For a later migration to Cloudflare Pages, connect the existing `pdf-local` repository in **Workers & Pages → Create → Pages → Connect to Git** and set:
 
 | Setting | Value |
 | --- | --- |
@@ -139,6 +141,8 @@ Once the new repository exists, connect it in Cloudflare **Workers & Pages → C
 | Node version | `24` using the project version file or Pages environment setting |
 
 Set the production `SITE_URL` and `CONTACT_EMAIL` in Cloudflare Pages; leave `SITE_BASE=/` for a domain-root deployment. No server runtime, database binding, or paid API configuration is needed. A successful build is not proof of browser behavior: test file selection, conversion, download, language switching, mobile controls, and errors on the deployed origin.
+
+Check emitted asset sizes before migrating the Hangul build to Cloudflare Pages. Its current single-file asset limit is 25 MiB, and the HWP WebAssembly binary may exceed that limit. GitHub Pages can serve the current larger binary, but an unchanged output should not be assumed to fit Cloudflare Pages: arrange chunked runtime loading or a suitable static-asset host first. This concerns delivery of the converter code, not uploading visitors' documents.
 
 Add a purchased domain through the Pages project's **Custom domains** section and follow Cloudflare's DNS instructions. Wait for domain validation and the HTTPS certificate to be active. Choose one primary hostname and configure permanent redirects for the other hostname(s); do not leave the Pages hostname and both apex/`www` independently indexed. See [the launch guide](docs/LAUNCH.md) for verification details.
 
@@ -174,7 +178,8 @@ Project source is licensed under [MIT](LICENSE). Dependencies retain their own l
 | TypeScript | 6.0.3 | Type checking | Apache-2.0 |
 | pdf-lib | 1.17.1 | PDF manipulation and image embedding | MIT |
 | PDF.js (`pdfjs-dist`) | 6.5.438 | PDF previews and page rendering | Apache-2.0 |
-| `@silurus/ooxml` | 0.89.9 | Trial DOCX/PPTX parsing and local Canvas rendering | MIT, with bundled third-party notices |
+| `@silurus/ooxml` | 0.89.9 | DOCX/PPTX parsing and local Canvas rendering | MIT, with bundled third-party notices |
+| `@rhwp/core` | 0.9.0 | Local HWP 5.0/HWPX parsing and rendering | MIT |
 | fflate | 0.8.3 | ZIP generation | MIT |
 | Vitest | 5.1.0 | Development tests | MIT |
 | `@napi-rs/canvas` | 1.1.0 | Development-only Canvas rendering tests | MIT |
@@ -188,5 +193,7 @@ PDF.js includes additional asset notices: Liberation fonts use GPLv2 with an exp
 
 `@silurus/ooxml` ships an MIT `LICENSE` and `THIRD_PARTY_NOTICES.md`, including notices for bundled parser dependencies and optional rendering assets. The build copies them to `licenses/silurus-ooxml.txt` and `licenses/silurus-ooxml-third-party.txt`, alongside the local parser assets under `office/`. Preserve both when distributing its JavaScript/WASM assets.
 
-The Office trial lazily loads a self-hosted Noto Sans KR font from `fonts/NotoSansKR.ttf`; documents are not sent to a font service, and no Google Fonts stylesheet/API is used at runtime. The font is sourced from the official [Google Fonts Noto Sans KR directory](https://github.com/google/fonts/tree/main/ofl/notosanskr) and distributed under the SIL Open Font License 1.1, retained at `fonts/OFL.txt`. The checked source font has SHA-256 `194018e6b2b293a7964f037b25c0249ce1418bc9ab3c971060a03aa57861e252`. Font substitution can still change Office line breaks and pagination. Additional hosted fonts, codecs or renderers need their own notices and validation before being enabled.
+`@rhwp/core` 0.9.0 is distributed under MIT. The build retains its author copyright and MIT license at `licenses/rhwp-core.txt` and its complete bundled third-party notices under `licenses/rhwp-notices/`, alongside `hangul/rhwp_bg.wasm`. Preserve this directory when distributing the runtime: it includes additional font, codec and other asset terms. Review bundled assets and transitive notices when updating the package, and do not assume that an engine license grants redistribution rights to unrelated Hancom fonts.
+
+Document conversion lazily loads a self-hosted Noto Sans KR font from `fonts/NotoSansKR.ttf`; documents are not sent to a font service, and no Google Fonts stylesheet/API is used at runtime. The font is sourced from the official [Google Fonts Noto Sans KR directory](https://github.com/google/fonts/tree/main/ofl/notosanskr) and distributed under the SIL Open Font License 1.1, retained at `fonts/OFL.txt`. The checked source font has SHA-256 `194018e6b2b293a7964f037b25c0249ce1418bc9ab3c971060a03aa57861e252`. Font substitution can still change document line breaks and pagination. Additional hosted fonts, codecs or renderers need their own notices and validation before being enabled.
 

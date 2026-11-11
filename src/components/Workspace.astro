@@ -19,7 +19,7 @@ const accept=isOffice?d.tools[tool].accept:isImage?'image/jpeg,image/png,.jpg,.j
     <p class="privacy-hint"><Icon name="lock" size={15} />{d.privacyHint}</p>
   </div>
   <div id="tool-error" class="error" role="alert" hidden></div>
-  {isOffice && <p class="notice"><strong>{d.trialLabel}</strong> · {d.officeNotice}</p>}
+  {isOffice && <p class="notice">{d.officeNotice}</p>}
   <div id="work-area" class="workspace" hidden>
     <div class="toolbar">
       <strong id="file-summary" aria-live="polite"></strong>

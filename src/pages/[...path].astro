@@ -8,7 +8,7 @@ import { sitePath } from '../lib/site-path';
 export function getStaticPaths() {
   const legal=['about','privacy','terms','contact'] as const;
   return locales.flatMap(locale => [
-    {params:{path:locale==='en'?undefined:locale},props:{locale,route:'',tool:'merge-pdf',legal:undefined}},
+    {params:{path:locale==='en'?undefined:locale},props:{locale,route:'',tool:tools[0],legal:undefined}},
     ...tools.map(tool=>({params:{path:localePath(locale,tool).replace(/^\/|\/$/g,'')},props:{locale,route:tool,tool,legal:undefined}})),
     ...legal.map(slug=>({params:{path:localePath(locale,slug).replace(/^\/|\/$/g,'')},props:{locale,route:slug,tool:undefined,legal:slug}})),
   ]);
@@ -18,7 +18,7 @@ const {locale,route,tool,legal}=Astro.props;
 const d=getText(locale);
 const content=tool?toolContent(locale,tool):undefined;
 const info=legal?legalContent(locale,legal,!!import.meta.env.CONTACT_EMAIL):undefined;
-const title=info?.title || (route?content!.title:`${d.heroTitle} | PDFEditNow`);
+const title=info?.title || (route?content!.title:`${d.heroTitle} | PDFEditGo`);
 const description=info?.description || content!.description;
 const contactEmail=import.meta.env.CONTACT_EMAIL;
 ---
