@@ -1,6 +1,6 @@
 # PDF Room
 
-A standalone, static PDF toolbox built with Astro and TypeScript for Cloudflare Pages. **PDF Room is a working name**, and `pdf-local` is the independent project directory/repository name. A domain has not been selected or registered by this project.
+A standalone, static PDF toolbox built with Astro and TypeScript for Cloudflare Pages or GitHub Pages. **PDF Room is a working name**, and `pdf-local` is the independent project directory/repository name. A domain has not been selected or registered by this project.
 
 한국어: 기존 Number-select와 분리된 신규 프로젝트입니다. 파일을 서버에 올리지 않고 브라우저 안에서 처리하며, 결과는 사용자의 기기로 다운로드합니다. 영어·한국어·스페인어·일본어를 지원합니다. 배포 전 실제 도메인과 운영자 연락처를 설정하세요.
 
@@ -39,7 +39,7 @@ npm run build
 npm run check:build
 ```
 
-The GitHub Actions workflow runs those checks; it does not publish the website. Check output and browser verification results should be reviewed before public release.
+The `Check project` GitHub Actions workflow runs those checks without publishing. The separate `Deploy GitHub Pages` workflow builds and publishes when GitHub Pages has been enabled for this repository. Check output and browser verification results should be reviewed before public release.
 
 ## Project layout
 
@@ -83,11 +83,12 @@ JPG conversion is lossy. PNG output can be large. Export resolution affects both
 
 ## Production configuration
 
-Copy `.env.example` to `.env` for local configuration, or set variables in Cloudflare Pages. They are build-time configuration; they are **not secrets**.
+Copy `.env.example` to `.env` for local configuration, or set the relevant hosting/workflow variables. They are build-time configuration; they are **not secrets**.
 
 | Variable | Purpose |
 | --- | --- |
 | `SITE_URL` | The actual production origin, such as the assigned Pages hostname or your final custom domain. Used for canonical URLs, language alternates, Open Graph URLs, sitemap, and robots references. |
+| `SITE_BASE` | Deployment path, normally `/`. A GitHub project site uses `/pdf-local/`; the GitHub Pages workflow obtains this from the repository's Pages configuration. Keep `SITE_URL` as the origin without this path. |
 | `CF_PAGES_URL` | Cloudflare's deployment URL; the build can use it as a fallback when `SITE_URL` is absent. Prefer a stable `SITE_URL` for the production site. |
 | `CONTACT_EMAIL` | A real public operator support address. Configure it before public launch; never enter a private credential. |
 
@@ -95,9 +96,28 @@ Do not publish canonical links pointing to `your-project.pages.dev`, localhost, 
 
 A production origin and operator email are not required to create the initial private GitHub repository or develop locally. When neither origin variable is configured, the build omits absolute canonical/language-alternate metadata and emits an empty sitemap rather than inventing a public domain. With no `CONTACT_EMAIL`, the contact page describes the missing support channel and does not display a fake form or address. These are public-launch requirements, not blockers for private source review; configure and verify them before opening the site to general visitors.
 
-## GitHub and Cloudflare Pages
+## Independent repository
 
 Use a **new GitHub repository** for this folder. Do not copy another project's environment variables, credentials, Git remotes, source, or Supabase settings. No modification of Number-select is needed.
+
+## GitHub Pages
+
+GitHub Pages must be enabled separately from uploading source code. In **this repository only**, open **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**. If GitHub says the private repository needs an upgrade, the current account is not eligible to publish that private repository with Pages. GitHub Free supports Pages from public repositories; private-repository Pages requires an eligible paid plan. Do not change repository visibility without the owner's explicit choice. Cloudflare Pages can instead publish this static site while the GitHub repository stays private.
+
+After Pages is enabled, open **Actions → Deploy GitHub Pages → Run workflow** for `main` if the initial push did not start a run. Subsequent pushes to `main` trigger that deployment workflow. The workflow installs the lockfile, runs checks/tests, builds, verifies the output, and deploys `dist` with GitHub's official Pages actions. It uses the configured Pages origin and base path, so worker assets, localized routes and downloads work under a project URL. It does not need a personal token or a paid conversion service.
+
+The expected project URL for this repository is **https://oreoo1224.github.io/pdf-local/**. This is an expected address, **not confirmation that deployment has succeeded**. Confirm the workflow's `github-pages` environment URL, terminal deployment result and an HTTPS visit before reporting it as live. Configure the real operator email as repository variable `CONTACT_EMAIL` before public launch, then rerun the workflow. Review the browser-verification checklist in [the launch guide](docs/LAUNCH.md).
+
+For a local production-output check of the same subpath setup:
+
+```sh
+SITE_URL=https://oreoo1224.github.io SITE_BASE=/pdf-local/ npm run build
+SITE_URL=https://oreoo1224.github.io SITE_BASE=/pdf-local/ npm run check:build
+```
+
+Use a single primary host for search indexing. If GitHub Pages is a temporary preview and Cloudflare/custom-domain hosting becomes production, update the origin/base, canonical URLs and hosting redirects instead of leaving duplicate sites independently indexed.
+
+## Cloudflare Pages
 
 Once the new repository exists, connect it in Cloudflare **Workers & Pages → Create → Pages → Connect to Git**. Select only the new repository and set:
 
@@ -109,17 +129,17 @@ Once the new repository exists, connect it in Cloudflare **Workers & Pages → C
 | Build output directory | `dist` |
 | Node version | `24` using the project version file or Pages environment setting |
 
-Set the production `SITE_URL` and `CONTACT_EMAIL` in Pages. No server runtime, database binding, or paid API configuration is needed. A successful build is not proof of browser behavior: test file selection, conversion, download, language switching, mobile controls, and errors on the deployed origin.
+Set the production `SITE_URL` and `CONTACT_EMAIL` in Cloudflare Pages; leave `SITE_BASE=/` for a domain-root deployment. No server runtime, database binding, or paid API configuration is needed. A successful build is not proof of browser behavior: test file selection, conversion, download, language switching, mobile controls, and errors on the deployed origin.
 
 Add a purchased domain through the Pages project's **Custom domains** section and follow Cloudflare's DNS instructions. Wait for domain validation and the HTTPS certificate to be active. Choose one primary hostname and configure permanent redirects for the other hostname(s); do not leave the Pages hostname and both apex/`www` independently indexed. See [the launch guide](docs/LAUNCH.md) for verification details.
 
 ## Security headers
 
-`public/_headers` is copied to the Pages output. It restricts embedding and device permissions, disables content-type sniffing, and limits runtime resource origins to the site plus local Blob/data resources. The CSP allows same-origin scripts/assets, Blob workers and previews, and WebAssembly compilation used by PDF rendering.
+`public/_headers` is copied to the static output and interpreted by **Cloudflare Pages**. On that host it restricts embedding and device permissions, disables content-type sniffing, and limits runtime resource origins to the site plus local Blob/data resources. The CSP allows same-origin scripts/assets, Blob workers and previews, and WebAssembly compilation used by PDF rendering. **GitHub Pages does not interpret `_headers`**, so do not claim those custom HTTP headers are active there. Use a host with configurable response headers if those policies are required.
 
 The initial policy permits inline scripts for generated metadata and inline styles. It does not permit JavaScript `eval`. Before tightening it with hashes/nonces, inventory the actual generated HTML and test workers, font rendering, all tools, and all locales. Any future analytics, ads, consent manager, external font, or contact integration requires an intentional policy update and retesting. Never add broad wildcards simply to make a third-party snippet work.
 
-Only fingerprinted `/_astro/` assets receive one-year immutable caching. HTML and policy pages are not assigned immutable caching by this project.
+On Cloudflare Pages with the supplied root-path configuration, only fingerprinted `/_astro/` assets receive one-year immutable caching. HTML and policy pages are not assigned immutable caching by this project. GitHub Pages applies its own caching behavior.
 
 ## Ads and future monetization
 

@@ -1,13 +1,14 @@
 ---
 import Icon from './Icon.astro';
 import { tools, getText, localePath, type Locale, type Tool } from '../lib/i18n';
+import { sitePath } from '../lib/site-path';
 interface Props { locale: Locale; selected: Tool; }
 const {locale, selected} = Astro.props;
 const d=getText(locale);
 const icons={ 'merge-pdf':'merge','organize-pdf':'organize','pdf-to-jpg':'image','jpg-to-pdf':'images' };
 ---
 <nav id="tools" class="tool-grid" aria-label={d.navTools}>
-  {tools.map(tool => <a class="tool-card" href={localePath(locale,tool)} aria-current={selected===tool?'page':undefined}>
+  {tools.map(tool => <a class="tool-card" href={sitePath(localePath(locale,tool))} aria-current={selected===tool?'page':undefined}>
     <Icon name={icons[tool]} size={54} />
     <span class="tool-name">{d.tools[tool].name}</span>
     <span class="tool-short">{d.tools[tool].short}</span>

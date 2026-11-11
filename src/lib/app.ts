@@ -1,9 +1,10 @@
 import { getText, type Locale, type Tool } from './i18n';
+import { sitePath } from './site-path';
 
 const language = document.querySelector<HTMLSelectElement>('#site-language');
 try {
   const remembered = localStorage.getItem('pdfroom-language');
-  if (location.pathname === '/' && remembered && ['ko', 'es', 'ja'].includes(remembered)) location.replace(`/${remembered}/`);
+  if (location.pathname === sitePath('/') && remembered && ['ko', 'es', 'ja'].includes(remembered)) location.replace(sitePath(`/${remembered}/`));
 } catch { /* Direct URLs and all tools work with storage disabled. */ }
 language?.addEventListener('change', () => {
   try { localStorage.setItem('pdfroom-language', language.selectedOptions[0]?.lang || 'en'); } catch { /* Storage is optional. */ }

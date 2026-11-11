@@ -4,6 +4,7 @@ import ToolCards from '../components/ToolCards.astro';
 import Workspace from '../components/Workspace.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { locales, tools, getText, localePath, toolContent, legalContent, type Locale, type Tool } from '../lib/i18n';
+import { sitePath } from '../lib/site-path';
 export function getStaticPaths() {
   const legal=['about','privacy','terms','contact'] as const;
   return locales.flatMap(locale => [
@@ -41,7 +42,7 @@ const contactEmail=import.meta.env.CONTACT_EMAIL;
       <h2>{d.faq}</h2>
       {content.faqs.map(faq=><details class="faq-item"><summary>{faq.q}</summary><p>{faq.a}</p></details>)}
       <h2>{d.relatedTools}</h2>
-      <nav class="related" aria-label={d.relatedTools}>{tools.filter(t=>t!==tool).map(t=><a href={localePath(locale,t)}>{d.tools[t].name}</a>)}</nav>
+      <nav class="related" aria-label={d.relatedTools}>{tools.filter(t=>t!==tool).map(t=><a href={sitePath(localePath(locale,t))}>{d.tools[t].name}</a>)}</nav>
     </article>
   </> : info ? <article class="legal">
     <h1>{info.title}</h1>

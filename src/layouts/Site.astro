@@ -2,10 +2,11 @@
 import '../styles/global.css';
 import Icon from '../components/Icon.astro';
 import { getText, locales, localePath, type Locale } from '../lib/i18n';
+import { sitePath } from '../lib/site-path';
 interface Props { locale: Locale; title: string; description: string; route?: string; application?: boolean; }
 const { locale, title, description, route = '', application = false } = Astro.props;
 const d = getText(locale);
-const canonical = Astro.site ? new URL(localePath(locale, route), Astro.site).href : undefined;
+const canonical = Astro.site ? new URL(sitePath(localePath(locale, route)), Astro.site).href : undefined;
 const schema = application ? {
   '@context': 'https://schema.org', '@type': 'WebApplication', name: title,
   description, ...(canonical ? {url:canonical} : {}), applicationCategory: 'UtilitiesApplication',
@@ -21,10 +22,10 @@ const schema = application ? {
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#1558e8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={sitePath('/favicon.svg')} />
     {canonical && <link rel="canonical" href={canonical} />}
-    {Astro.site && locales.map(lang => <link rel="alternate" hreflang={lang} href={new URL(localePath(lang,route),Astro.site).href} />)}
-    {Astro.site && <link rel="alternate" hreflang="x-default" href={new URL(localePath('en',route),Astro.site).href} />}
+    {Astro.site && locales.map(lang => <link rel="alternate" hreflang={lang} href={new URL(sitePath(localePath(lang,route)),Astro.site).href} />)}
+    {Astro.site && <link rel="alternate" hreflang="x-default" href={new URL(sitePath(localePath('en',route)),Astro.site).href} />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -36,12 +37,12 @@ const schema = application ? {
   <body>
     <a class="skip" href="#main">{d.skipToContent}</a>
     <header class="site-header">
-      <a class="brand" href={localePath(locale)}><Icon name="logo" size={34} />PDF Room</a>
+      <a class="brand" href={sitePath(localePath(locale))}><Icon name="logo" size={34} />PDF Room</a>
       <nav class="header-right" aria-label={d.navTools}>
-        <a href={`${localePath(locale)}#tools`}>{d.navTools}</a>
+        <a href={`${sitePath(localePath(locale))}#tools`}>{d.navTools}</a>
         <label class="sr-only" for="site-language">{d.language}</label>
         <select id="site-language" class="language-select" aria-label={d.language}>
-          {locales.map(lang => <option value={localePath(lang,route)} selected={lang===locale} lang={lang}>{{en:'English',ko:'한국어',es:'Español',ja:'日本語'}[lang]}</option>)}
+          {locales.map(lang => <option value={sitePath(localePath(lang,route))} selected={lang===locale} lang={lang}>{{en:'English',ko:'한국어',es:'Español',ja:'日本語'}[lang]}</option>)}
         </select>
       </nav>
     </header>
@@ -49,7 +50,7 @@ const schema = application ? {
     <footer class="site-footer">
       <span>© {new Date().getFullYear()} PDF Room</span>
       <nav class="footer-links" aria-label="Information">
-        {(['about','privacy','terms','contact'] as const).map(slug => <a href={localePath(locale,slug)}>{d[slug]}</a>)}
+        {(['about','privacy','terms','contact'] as const).map(slug => <a href={sitePath(localePath(locale,slug))}>{d[slug]}</a>)}
       </nav>
     </footer>
     <script>
