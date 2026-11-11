@@ -1,6 +1,6 @@
 export const locales = ['en', 'ko', 'es', 'ja'] as const;
 export type Locale = (typeof locales)[number];
-export const tools = ['merge-pdf', 'organize-pdf', 'pdf-to-jpg', 'jpg-to-pdf'] as const;
+export const tools = ['merge-pdf', 'jpg-to-pdf', 'pdf-to-jpg', 'organize-pdf'] as const;
 export type Tool = (typeof tools)[number];
 export type LegalSlug = 'about' | 'privacy' | 'terms' | 'contact';
 
