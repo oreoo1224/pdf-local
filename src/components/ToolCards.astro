@@ -5,11 +5,12 @@ import { sitePath } from '../lib/site-path';
 interface Props { locale: Locale; selected: Tool; }
 const {locale, selected} = Astro.props;
 const d=getText(locale);
-const icons={ 'merge-pdf':'merge','organize-pdf':'organize','pdf-to-jpg':'image','jpg-to-pdf':'images' };
+const icons={ 'merge-pdf':'merge','organize-pdf':'organize','pdf-to-jpg':'image','jpg-to-pdf':'images','word-to-pdf':'word','ppt-to-pdf':'ppt' };
 ---
 <nav id="tools" class="tool-grid" aria-label={d.navTools}>
   {tools.map(tool => <a class="tool-card" href={sitePath(localePath(locale,tool))} aria-current={selected===tool?'page':undefined}>
-    <Icon name={icons[tool]} size={54} />
+    {(tool==='word-to-pdf'||tool==='ppt-to-pdf') && <span class="tool-trial">{d.trialLabel}</span>}
+    <Icon name={icons[tool]} size={40} />
     <span class="tool-name">{d.tools[tool].name}</span>
     <span class="tool-short">{d.tools[tool].short}</span>
   </a>)}

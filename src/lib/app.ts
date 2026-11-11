@@ -41,6 +41,8 @@ function initialize(root: HTMLElement) {
   const saveLocal = get<HTMLButtonElement>('save-local');
   const saveHint = get('save-local-hint');
   const isImage = tool === 'jpg-to-pdf';
+  const isOffice = tool === 'word-to-pdf' || tool === 'ppt-to-pdf';
+  const officeKind = tool === 'word-to-pdf' ? 'docx' : 'pptx';
   const multi = isImage || tool === 'merge-pdf';
   let files: Array<{ file: File; count: number; thumbnail?: string }> = [];
   let pages: Array<{ index: number; rotation: number; url?: string }> = [];
@@ -159,7 +161,7 @@ function initialize(root: HTMLElement) {
       const info = document.createElement('div'); info.className = 'file-info';
       const name = document.createElement('div'); name.className = 'file-name'; name.textContent = entry.file.name;
       const detail = document.createElement('div'); detail.className = 'file-detail';
-      detail.textContent = `${sizeLabel(entry.file.size)}${isImage ? '' : ` · ${entry.count} ${d.pages}`}`;
+      detail.textContent = `${sizeLabel(entry.file.size)}${isOffice?` · ${officeKind.toUpperCase()}`:isImage ? '' : ` · ${entry.count} ${d.pages}`}`;
       info.append(name, detail); li.append(info);
       const controls = document.createElement('div'); controls.className = 'file-controls';
       if (multi) controls.append(
@@ -185,7 +187,7 @@ function initialize(root: HTMLElement) {
       });
       list.append(li);
     });
-    get('file-summary').textContent = `${files.length} ${d.files}${isImage ? '' : ` · ${files.reduce((sum,entry)=>sum+entry.count,0)} ${d.pages}`}`;
+    get('file-summary').textContent = `${files.length} ${d.files}${isImage||isOffice ? '' : ` · ${files.reduce((sum,entry)=>sum+entry.count,0)} ${d.pages}`}`;
     updateControls();
   }
   function movePage(position: number, target: number) {
@@ -249,6 +251,7 @@ function initialize(root: HTMLElement) {
     if (!multi && incoming.length !== 1) { showError('needOne'); return; }
     const prospective = multi ? [...files.map(entry => entry.file), ...incoming] : incoming;
     if (prospective.length > 30) { showError('tooManyFiles'); return; }
+    if (isOffice&&incoming.some(file=>file.size>20*1024*1024)){showError('officeTooLarge');return;}
     if (incoming.some(file => file.size > 50 * 1024 * 1024)) { showError('fileSize'); return; }
     if (prospective.reduce((sum,file)=>sum+file.size,0) > 100 * 1024 * 1024) { showError('totalSize'); return; }
     const current = ++revision;
@@ -258,7 +261,11 @@ function initialize(root: HTMLElement) {
       const accepted: typeof files = [];
       for (let i=0;i<incoming.length;i++) {
         const file = incoming[i]!;
-        if (isImage) {
+        if (isOffice) {
+          const {validateOfficeFile}=await import('./office');
+          await validateOfficeFile(file,officeKind);
+          accepted.push({file,count:0});
+        } else if (isImage) {
           await engine.validateImageFile(file);
           accepted.push({file,count:1});
         } else {
@@ -321,6 +328,13 @@ function initialize(root: HTMLElement) {
           orientation:get<HTMLSelectElement>('orientation').value as 'auto'|'portrait'|'landscape',
           margin:Number(get<HTMLSelectElement>('margin').value),fit:get<HTMLSelectElement>('fit').value as 'contain'|'cover',
         },progress);name='images.pdf';
+      } else if(isOffice) {
+        get('progress-text').textContent=d.officeLoading;
+        const {officeToPdf}=await import('./office');
+        const output=await officeToPdf(files[0]!.file,officeKind,{
+          scale:Number(get<HTMLSelectElement>('office-resolution').value),
+          range:get<HTMLInputElement>('page-range').value,
+        },progress);blob=output.blob;name=output.name;
       } else {
         const {pdfToImages}=await import('./pdf-render');
         const output=await pdfToImages(files[0]!.file,{
@@ -331,7 +345,7 @@ function initialize(root: HTMLElement) {
       }
       if(current===revision){progress(100);showResult(blob,name);}
     } catch(error){if(current===revision)showError(error);}
-    finally{if(current===revision)setBusy(false);}
+    finally{if(current===revision){setBusy(false);get('progress-text').textContent=d.processing;}}
   }
 
   get('choose-files').addEventListener('click',()=>fileInput.click());

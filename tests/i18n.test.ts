@@ -20,7 +20,7 @@ describe('language routes', () => {
 
   it('makes every localized tool route unique, root relative and canonical', () => {
     const routes = locales.flatMap(locale => tools.map(tool => localePath(locale, tool)));
-    expect(new Set(routes).size).toBe(16);
+    expect(new Set(routes).size).toBe(locales.length * tools.length);
     for (const route of routes) {
       expect(route.startsWith('/')).toBe(true);
       expect(route.endsWith('/')).toBe(true);

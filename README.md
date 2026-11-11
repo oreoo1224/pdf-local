@@ -8,20 +8,24 @@ Live GitHub Pages preview: **https://oreoo1224.github.io/pdf-local/**. Deploymen
 
 ## What this version includes
 
-The main screen follows one simple flow: choose one of four square tool cards, select or drop files, configure the result, then download it. A single centered save button mirrors the result download and remains disabled until a converted file is ready.
+The main screen follows one simple flow: choose one of six square tool cards in a single horizontal row, select or drop files, configure the result, then download it. Narrow screens scroll the same row horizontally. A single centered save button mirrors the result download and remains disabled until a converted file is ready.
 
 See the [generated design reference](docs/design-reference.png). It illustrates the intended layout; it is not a browser screenshot.
 
 | Tool | Processing |
 | --- | --- |
 | Merge PDF | Combine PDF files in the chosen order. |
-| Organize PDF | Preview pages, reorder, rotate, remove, and extract selected pages or page ranges into a new PDF. |
-| PDF to Image | Export selected pages as JPG or PNG; download multiple pages in a ZIP. |
 | Image to PDF | Combine JPG/JPEG and PNG images with paper size, orientation, margins, and image-fit controls. |
+| PDF to Image | Export selected pages as JPG or PNG; download multiple pages in a ZIP. |
+| Organize PDF | Preview pages, reorder, rotate, remove, and extract selected pages or page ranges into a new PDF. |
+| Word to PDF — trial | Render simple `.docx` pages locally and save them as an image-based PDF. |
+| PPT to PDF — trial | Render simple `.pptx` slides locally and save them as an image-based PDF. |
 
 English is the fallback language. Korean, Spanish, and Japanese have their own statically generated URLs. On a first visit to the homepage, the browser’s preferred languages can select a supported language automatically. A manually chosen language is remembered and takes priority; explicit localized URLs are respected. This uses no IP-country lookup or geolocation API. Each tool has indexable HTML content, page metadata, related tools, and instructions. Policy and information pages are included.
 
-This version does **not** include Word/Excel conversion, OCR, editing existing PDF text, a separate image compressor/resizer/converter, accounts, a database, advertising, or analytics. Additional image tools are future work and should not be advertised as available before implementation.
+The Word and PPT converters are trial tools for basic documents. Their PDFs contain page images, so the output does not preserve selectable or searchable text. Fonts, pagination and complex layouts may differ from desktop Office. Older binary `.doc` and `.ppt` files are not supported.
+
+This version does **not** include Excel conversion, OCR, editing existing PDF text, a separate image compressor/resizer/converter, accounts, a database, advertising, or analytics. Additional image tools are future work and should not be advertised as available before implementation.
 
 ## Local development
 
@@ -58,7 +62,7 @@ tests/           Automated processing tests
 docs/LAUNCH.md   Deployment and public-launch checklist
 ```
 
-`src/lib/pdf.ts` handles PDF document operations. `src/lib/pdf-render.ts` handles PDF previews and PDF-to-image rendering. UI code should not mix file contents into HTML; filenames must be inserted as text.
+`src/lib/pdf.ts` handles PDF document operations. `src/lib/pdf-render.ts` handles PDF previews and PDF-to-image rendering. `src/lib/office.ts` provides the trial Word/PPT conversion path. UI code should not mix file contents into HTML; filenames must be inserted as text.
 
 ## File privacy and runtime behavior
 
@@ -72,13 +76,15 @@ docs/LAUNCH.md   Deployment and public-launch checklist
 
 ## Supported inputs and practical limits
 
-The tools target ordinary, unencrypted PDF documents and valid JPG/JPEG or PNG image files. Encrypted, malformed, unsupported, or oversized input must produce an error instead of silently ignoring encryption or generating a misleading result.
+The established tools target ordinary, unencrypted PDF documents and valid JPG/JPEG or PNG image files. Trial Office tools accept basic, unencrypted `.docx` and `.pptx` files. Encrypted, malformed, unsupported, or oversized input must produce an error instead of silently ignoring encryption or generating a misleading result.
 
 Browser memory varies by device. Safeguards bound file count, total input bytes, page rendering, and canvas area; they are technical limits per operation, not a paid usage quota. Thumbnails and rendered pages should be processed sequentially, with document handles, object URLs, and temporary canvases released when no longer used. A browser may still terminate a tab under memory pressure.
 
 Current UI limits: 30 input files, 50 MB per file and 100 MB total; the page editor accepts up to 200 pages per document. PDF-to-image exports accept at most 100 selected pages per task. Source images are limited to 40 megapixels, rendered canvases to 24 megapixels, and accumulated ZIP contents to 150 MB. Lower limits may still be necessary on a memory-constrained phone. JPEG EXIF rotation and mirroring are honored without recompressing source photos.
 
-Verification for this initial repository: automated PDF, localization, language-preference and deploy-path tests, Astro/TypeScript diagnostics, and production-output route/metadata/link checks have passed. GitHub Pages deployment succeeded, and HTTP checks passed for all four language home pages, all four English tools, scripts, the PDF worker and SEO files. Browser UI, Canvas/PDF.js rendering and mobile downloads still need browser verification. The supplied design reference is a generated concept using the earlier working title, not a screenshot of the running website.
+The Office trial has separate safeguards: one input file of at most 20 MB and at most 50 output pages or slides per task. Rendering proceeds sequentially and releases page images as they are embedded. These limits reduce memory pressure but cannot guarantee that every supported-size document will render on a phone. Documents with external relationships, including hyperlinks and externally linked images, templates or media, are rejected rather than requesting their resources. Complex Word pagination, SmartArt, charts, equations, custom fonts and other Office-specific features require representative-file testing; unsupported content must not be described as fully compatible.
+
+Verification: 167 automated tests, Astro/TypeScript diagnostics, and production-output route/metadata/link checks passed. The Office suite includes the production PDF assembly pipeline with actual OOXML/WASM parsing and Node Canvas rendering: a one-page Word sample with text/table/picture and a two-slide landscape PPT sample with text/shapes/picture. The resulting PDFs were rasterized and visually checked, including Korean and Japanese text. These samples do not establish full Office fidelity. Browser Worker execution, interactive Office conversion/downloads and mobile use still need browser verification. The supplied design reference is a generated concept using the earlier working title, not a screenshot of the running website.
 
 Editing a PDF changes its bytes and can invalidate existing digital signatures. Preservation of interactive forms, bookmarks, attachments, accessibility structure, and other document-level features is not guaranteed. Keep the original and review important output before relying on it.
 
@@ -168,8 +174,10 @@ Project source is licensed under [MIT](LICENSE). Dependencies retain their own l
 | TypeScript | 6.0.3 | Type checking | Apache-2.0 |
 | pdf-lib | 1.17.1 | PDF manipulation and image embedding | MIT |
 | PDF.js (`pdfjs-dist`) | 6.5.438 | PDF previews and page rendering | Apache-2.0 |
+| `@silurus/ooxml` | 0.89.9 | Trial DOCX/PPTX parsing and local Canvas rendering | MIT, with bundled third-party notices |
 | fflate | 0.8.3 | ZIP generation | MIT |
 | Vitest | 5.1.0 | Development tests | MIT |
+| `@napi-rs/canvas` | 1.1.0 | Development-only Canvas rendering tests | MIT |
 | Vite | 8.3.8 | Asset bundling and build-time environment configuration | MIT |
 | `@astrojs/check` | 0.9.12 | Astro diagnostics | MIT |
 | `@types/node` | 26.6.6 | Development type declarations | MIT |
@@ -177,4 +185,8 @@ Project source is licensed under [MIT](LICENSE). Dependencies retain their own l
 The versions and licenses above were checked against the installed package manifests and license files. This is a direct-dependency inventory, not an exhaustive audit of every transitive package. The build helper copies the runtime libraries' license texts into `public/licenses/` and preserves the license files alongside PDF.js assets.
 
 PDF.js includes additional asset notices: Liberation fonts use GPLv2 with an explicit font exception; Foxit fonts and some image decoders use permissive BSD-style terms; other decoder components use MIT or Apache-2.0; ICC profiles use CC0. The exact included license files remain the authoritative terms. Preserve those notices when distributing or updating the copied assets, and do not describe all PDF.js assets as solely Apache-2.0. Recheck direct and transitive licenses after dependency updates. No paid conversion engine or service dependency is included.
+
+`@silurus/ooxml` ships an MIT `LICENSE` and `THIRD_PARTY_NOTICES.md`, including notices for bundled parser dependencies and optional rendering assets. The build copies them to `licenses/silurus-ooxml.txt` and `licenses/silurus-ooxml-third-party.txt`, alongside the local parser assets under `office/`. Preserve both when distributing its JavaScript/WASM assets.
+
+The Office trial lazily loads a self-hosted Noto Sans KR font from `fonts/NotoSansKR.ttf`; documents are not sent to a font service, and no Google Fonts stylesheet/API is used at runtime. The font is sourced from the official [Google Fonts Noto Sans KR directory](https://github.com/google/fonts/tree/main/ofl/notosanskr) and distributed under the SIL Open Font License 1.1, retained at `fonts/OFL.txt`. The checked source font has SHA-256 `194018e6b2b293a7964f037b25c0249ce1418bc9ab3c971060a03aa57861e252`. Font substitution can still change Office line breaks and pagination. Additional hosted fonts, codecs or renderers need their own notices and validation before being enabled.
 

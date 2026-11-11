@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Private-by-design PDF tools running entirely in the browser",
-  "engines": { "node": ">=24.0.0" },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "predev": "node scripts/prepare-assets.mjs",
     "dev": "astro dev --host 0.0.0.0",
@@ -16,6 +18,7 @@
     "preview": "astro preview --host 0.0.0.0"
   },
   "dependencies": {
+    "@silurus/ooxml": "0.89.9",
     "astro": "7.4.10",
     "fflate": "0.8.3",
     "pdf-lib": "1.17.1",
@@ -23,6 +26,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
+    "@napi-rs/canvas": "1.1.0",
     "@types/node": "26.6.6",
     "typescript": "6.0.3",
     "vite": "8.3.8",

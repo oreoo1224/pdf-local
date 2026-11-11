@@ -18,17 +18,19 @@ Review failures before publishing. Check the generated `dist/` includes static H
 
 Automated tests cover specific inputs; they do not establish that every PDF or every browser works. On desktop and a touch device, verify:
 
-- All four square tool buttons select the expected tool and upload instructions.
+- All six square tool buttons remain in one horizontal row and select the expected tool and upload instructions; narrow screens can scroll the row.
 - Selecting and dropping files works, and keyboard users can reach all controls.
 - Multiple PDFs merge in the displayed order.
 - Page extraction, deletion, reordering, and rotation give the expected downloaded pages; deleting every page is blocked.
 - JPG/PNG conversion exports the selected pages, honors the available quality/resolution controls, and generates a valid ZIP for multiple pages.
 - Images become a correctly oriented PDF with the selected paper, margins, and fit.
+- Basic DOCX and PPTX samples produce a valid trial image-based PDF with the expected page/slide order and dimensions. Check English and CJK text, a small table, pictures and basic shapes against the originals.
+- Office trial pages clearly explain that text is not selectable/searchable, complex layouts and fonts can differ, and legacy `.doc`/`.ppt` files are unsupported. Verify the 20 MB input and 50-page/slide task limits and error handling for corrupt, encrypted, wrong-format and externally linked content.
 - Damaged, encrypted, unsupported, and oversized files produce understandable errors.
 - New jobs and removed files release previews; old results do not replace a newer in-progress job.
 - Every locale renders complete controls, errors, instructions, and policy content.
 - Narrow screens have usable controls, no clipped downloads, and no required hover-only actions.
-- Browser developer tools show no PDF/image file contents being uploaded.
+- Browser developer tools show no PDF, image, DOCX or PPTX file contents being uploaded and no external Office resources being fetched.
 
 ## 2. Create and connect an independent repository
 

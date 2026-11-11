@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { loadEnv } from 'vite';
 
 const locales = ['en', 'ko', 'es', 'ja'];
-const routes = ['', 'merge-pdf', 'organize-pdf', 'pdf-to-jpg', 'jpg-to-pdf', 'about', 'privacy', 'terms', 'contact'];
+const routes = ['', 'merge-pdf', 'organize-pdf', 'pdf-to-jpg', 'jpg-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'about', 'privacy', 'terms', 'contact'];
+const pageCount = locales.length * routes.length;
 const titles = new Set();
 const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), ['SITE_URL', 'CF_PAGES_URL', 'SITE_BASE']);
 const origin = env.SITE_URL || env.CF_PAGES_URL;
@@ -41,12 +42,18 @@ assert.ok(assets.some(name => name.startsWith('pdf.worker') && name.endsWith('.m
 for (const directory of ['cmaps', 'standard_fonts', 'wasm', 'iccs']) {
   assert.ok((await readdir(`dist/pdfjs/${directory}`)).length > 0, `PDF.js ${directory}`);
 }
-for (const file of ['robots.txt', 'sitemap.xml', '_headers', 'licenses/pdf-lib.txt', 'licenses/pdfjs-dist.txt', 'licenses/fflate.txt']) await access(`dist/${file}`);
+for (const file of [
+  'robots.txt', 'sitemap.xml', '_headers',
+  'licenses/pdf-lib.txt', 'licenses/pdfjs-dist.txt', 'licenses/fflate.txt',
+  'office/docx_parser_bg.wasm', 'office/pptx_parser_bg.wasm',
+  'licenses/silurus-ooxml.txt', 'licenses/silurus-ooxml-third-party.txt',
+  'fonts/NotoSansKR.ttf', 'fonts/OFL.txt',
+]) await access(`dist/${file}`);
 const sitemap = await readFile('dist/sitemap.xml', 'utf8');
-assert.equal((sitemap.match(/<loc>/g) || []).length, origin ? 36 : 0, 'Sitemap origin handling');
+assert.equal((sitemap.match(/<loc>/g) || []).length, origin ? pageCount : 0, 'Sitemap origin handling');
 if(origin){
   for(const [,url] of sitemap.matchAll(/<loc>(.*?)<\/loc>/g)) assert.ok(url.startsWith(new URL(base,origin).href),'Sitemap preserves base');
   const robots=await readFile('dist/robots.txt','utf8');
   assert.ok(robots.includes(new URL(`${base}sitemap.xml`,origin).href),'Robots sitemap base');
 }
-console.log('Verified 36 static pages, unique metadata, internal links, local PDF assets and sitemap.');
+console.log(`Verified ${pageCount} static pages, unique metadata, internal links, local PDF/Office assets, font notices and sitemap.`);

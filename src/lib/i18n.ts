@@ -1,6 +1,6 @@
 export const locales = ['en', 'ko', 'es', 'ja'] as const;
 export type Locale = (typeof locales)[number];
-export const tools = ['merge-pdf', 'jpg-to-pdf', 'pdf-to-jpg', 'organize-pdf'] as const;
+export const tools = ['merge-pdf', 'jpg-to-pdf', 'pdf-to-jpg', 'organize-pdf', 'word-to-pdf', 'ppt-to-pdf'] as const;
 export type Tool = (typeof tools)[number];
 export type LegalSlug = 'about' | 'privacy' | 'terms' | 'contact';
 
@@ -45,13 +45,32 @@ const en = {
   howTo: 'How to use this tool', features: 'What you can do', faq: 'Frequently asked questions',
   footerNote: 'Free PDF tools. Your files stay on your device.', workingTitle: 'PDFEditNow',
   adNotice: 'Advertising', contactNote: 'A public support address has not been configured. See the contact page for the current status.',
+  "chooseWord": "Choose Word file",
+  "choosePpt": "Choose PowerPoint file",
+  "dropWord": "Drop your Word document here",
+  "dropPpt": "Drop your PowerPoint file here",
+  "officeWordHint": "Choose one .docx document, up to 20 MB",
+  "officePptHint": "Choose one .pptx presentation, up to 20 MB",
+  "officeNotice": "Trial conversion for DOCX and PPTX only. The PDF contains page images, so its text cannot be selected or searched. Complex layouts and fonts may look different. Older .doc and .ppt files are not supported.",
+  "officeAction": "Convert to PDF",
+  "trialLabel": "Trial",
+  "officeLoading": "Preparing your document…",
   tools: {
     'merge-pdf': { name: 'Merge PDF', short: 'Combine multiple PDFs', accept: 'application/pdf,.pdf' },
     'organize-pdf': { name: 'Organize PDF', short: 'Split, rotate & delete', accept: 'application/pdf,.pdf' },
     'pdf-to-jpg': { name: 'PDF to Image', short: 'Export JPG or PNG', accept: 'application/pdf,.pdf' },
     'jpg-to-pdf': { name: 'Image to PDF', short: 'Turn images into a PDF', accept: 'image/jpeg,image/png,.jpg,.jpeg,.png' },
+    "word-to-pdf": {"name": "Word to PDF", "short": "Trial · basic DOCX files", "accept": "application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"},
+    "ppt-to-pdf": {"name": "PPT to PDF", "short": "Trial · basic PPTX slides", "accept": "application/vnd.openxmlformats-officedocument.presentationml.presentation,.pptx"},
   },
   errors: {
+    "officeUnsupported": "Choose a DOCX file for Word or a PPTX file for PowerPoint. Older DOC/PPT, password-protected files and macro-enabled files are not supported.",
+    "officeCorrupt": "This Office document could not be read. It may be damaged or use an unsupported structure.",
+    "officeTooLarge": "Choose an Office file of 20 MB or less. Highly compressed or unusually large document contents are not supported.",
+    "officeRender": "A page could not be converted. Try a simpler document and check its fonts, images and layout.",
+    "officeBrowser": "Your browser does not support document rendering. Try a current version of Chrome, Edge, Firefox or Safari.",
+    "officeLimit": "Trial conversion supports up to 50 output pages or slides. Choose a smaller range or lower resolution.",
+    "officeExternal": "This trial does not load externally linked resources. Use a document with its pictures and other resources embedded.",
     tooManyFiles: 'Please process no more than 30 files in one task.', totalSize: 'The selected files exceed 100 MB. Try a smaller batch.',
     fileSize: 'A selected file exceeds 50 MB. Please choose a smaller file.', invalidPdf: 'This PDF could not be read. It may be damaged or unsupported.',
     invalidImage: 'This image could not be read. Please use a valid JPG or PNG file.', encrypted: 'Password-protected or encrypted PDFs are not supported. Use an unencrypted copy.',
@@ -91,13 +110,32 @@ const ko: Dictionary = {
   about: '서비스 소개', privacy: '개인정보 안내', terms: '이용약관', contact: '문의', relatedTools: '관련 도구', howTo: '사용 방법', features: '주요 기능', faq: '자주 묻는 질문',
   footerNote: '무료 PDF 도구. 파일은 내 기기에 머뭅니다.', workingTitle: 'PDFEditNow', adNotice: '광고',
   contactNote: '공개 문의 주소가 아직 설정되지 않았습니다. 현재 상태는 문의 페이지에서 확인할 수 있습니다.',
+  "chooseWord": "워드 파일 선택",
+  "choosePpt": "파워포인트 파일 선택",
+  "dropWord": "워드 문서를 여기에 놓으세요",
+  "dropPpt": "파워포인트 파일을 여기에 놓으세요",
+  "officeWordHint": "20MB 이하의 .docx 문서 하나를 선택하세요",
+  "officePptHint": "20MB 이하의 .pptx 프레젠테이션 하나를 선택하세요",
+  "officeNotice": "DOCX·PPTX 시험 변환 기능입니다. PDF에 페이지를 이미지로 담으므로 글자를 선택하거나 검색할 수 없습니다. 복잡한 배치와 글꼴은 원본과 다를 수 있으며, 이전 형식인 .doc·.ppt는 지원하지 않습니다.",
+  "officeAction": "PDF로 변환",
+  "trialLabel": "시험 기능",
+  "officeLoading": "문서를 준비하고 있습니다…",
   tools: {
     'merge-pdf': { name: 'PDF 합치기', short: '여러 PDF를 하나로', accept: 'application/pdf,.pdf' },
     'organize-pdf': { name: '페이지 편집', short: '나누기 · 회전 · 삭제', accept: 'application/pdf,.pdf' },
     'pdf-to-jpg': { name: 'PDF → 이미지', short: 'JPG 또는 PNG로 저장', accept: 'application/pdf,.pdf' },
     'jpg-to-pdf': { name: '이미지 → PDF', short: '이미지를 PDF로 변환', accept: 'image/jpeg,image/png,.jpg,.jpeg,.png' },
+    "word-to-pdf": {"name": "워드 → PDF", "short": "시험 · 기본 DOCX 문서", "accept": "application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"},
+    "ppt-to-pdf": {"name": "PPT → PDF", "short": "시험 · 기본 PPTX 슬라이드", "accept": "application/vnd.openxmlformats-officedocument.presentationml.presentation,.pptx"},
   },
   errors: {
+    "officeUnsupported": "워드는 DOCX, 파워포인트는 PPTX 파일을 선택해 주세요. 이전 형식 DOC·PPT, 암호로 보호된 파일, 매크로 포함 파일은 지원하지 않습니다.",
+    "officeCorrupt": "오피스 문서를 읽을 수 없습니다. 파일이 손상되었거나 지원하지 않는 구조일 수 있습니다.",
+    "officeTooLarge": "20MB 이하의 오피스 파일을 선택해 주세요. 압축 해제한 내용이 지나치게 큰 문서도 지원하지 않습니다.",
+    "officeRender": "페이지를 변환하지 못했습니다. 더 단순한 문서로 시도하고 글꼴·이미지·배치를 확인해 주세요.",
+    "officeBrowser": "브라우저가 문서 렌더링에 필요한 기능을 지원하지 않습니다. 최신 Chrome, Edge, Firefox 또는 Safari를 사용해 주세요.",
+    "officeLimit": "시험 변환은 최대 50페이지 또는 슬라이드를 지원합니다. 범위를 줄이거나 해상도를 낮춰 주세요.",
+    "officeExternal": "시험 기능은 외부 주소의 자료를 불러오지 않습니다. 사진 등 자료가 문서 안에 포함된 파일을 사용해 주세요.",
     tooManyFiles: '한 번에 처리할 파일을 30개 이하로 줄여 주세요.', totalSize: '선택한 파일의 총용량이 100MB를 넘습니다. 파일을 나누어 처리해 주세요.',
     fileSize: '50MB가 넘는 파일이 있습니다. 더 작은 파일을 선택해 주세요.', invalidPdf: 'PDF를 읽을 수 없습니다. 파일이 손상되었거나 지원하지 않는 형식일 수 있습니다.',
     invalidImage: '이미지를 읽을 수 없습니다. 올바른 JPG 또는 PNG 파일을 선택해 주세요.', encrypted: '암호로 보호되거나 암호화된 PDF는 지원하지 않습니다. 암호화되지 않은 사본을 사용해 주세요.',
@@ -131,13 +169,32 @@ const es: Dictionary = {
   about: 'Acerca de', privacy: 'Privacidad', terms: 'Condiciones', contact: 'Contacto', relatedTools: 'Herramientas relacionadas', howTo: 'Cómo utilizar esta herramienta', features: 'Qué puedes hacer', faq: 'Preguntas frecuentes',
   footerNote: 'Herramientas PDF gratuitas. Tus archivos permanecen en tu dispositivo.', workingTitle: 'PDFEditNow', adNotice: 'Publicidad',
   contactNote: 'Todavía no se ha configurado una dirección pública de soporte. Consulta su estado en la página de contacto.',
+  "chooseWord": "Elegir archivo Word",
+  "choosePpt": "Elegir archivo PowerPoint",
+  "dropWord": "Arrastra tu documento Word aquí",
+  "dropPpt": "Arrastra tu archivo PowerPoint aquí",
+  "officeWordHint": "Elige un documento .docx de hasta 20 MB",
+  "officePptHint": "Elige una presentación .pptx de hasta 20 MB",
+  "officeNotice": "Conversión de prueba solo para DOCX y PPTX. El PDF contiene imágenes de las páginas: no permite seleccionar ni buscar texto. Los diseños complejos y las fuentes pueden variar. No se admiten los formatos antiguos .doc y .ppt.",
+  "officeAction": "Convertir a PDF",
+  "trialLabel": "Prueba",
+  "officeLoading": "Preparando el documento…",
   tools: {
     'merge-pdf': { name: 'Unir PDF', short: 'Combina varios PDF', accept: 'application/pdf,.pdf' },
     'organize-pdf': { name: 'Organizar PDF', short: 'Divide, gira y elimina', accept: 'application/pdf,.pdf' },
     'pdf-to-jpg': { name: 'PDF a imagen', short: 'Exporta a JPG o PNG', accept: 'application/pdf,.pdf' },
     'jpg-to-pdf': { name: 'Imagen a PDF', short: 'Convierte imágenes a PDF', accept: 'image/jpeg,image/png,.jpg,.jpeg,.png' },
+    "word-to-pdf": {"name": "Word a PDF", "short": "Prueba · DOCX sencillos", "accept": "application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"},
+    "ppt-to-pdf": {"name": "PPT a PDF", "short": "Prueba · PPTX sencillos", "accept": "application/vnd.openxmlformats-officedocument.presentationml.presentation,.pptx"},
   },
   errors: {
+    "officeUnsupported": "Elige DOCX para Word o PPTX para PowerPoint. No se admiten DOC/PPT antiguos, archivos con contraseña ni archivos con macros.",
+    "officeCorrupt": "No se ha podido leer este documento de Office. Puede estar dañado o usar una estructura no compatible.",
+    "officeTooLarge": "Elige un archivo de Office de 20 MB o menos. Tampoco se admiten documentos con un contenido descomprimido excesivo.",
+    "officeRender": "No se ha podido convertir una página. Prueba un documento más sencillo y revisa sus fuentes, imágenes y diseño.",
+    "officeBrowser": "Tu navegador no permite representar el documento. Prueba una versión actual de Chrome, Edge, Firefox o Safari.",
+    "officeLimit": "La conversión de prueba admite hasta 50 páginas o diapositivas de salida. Reduce el intervalo o la resolución.",
+    "officeExternal": "Esta prueba no carga recursos enlazados desde otras webs. Usa un documento con las imágenes y demás recursos incluidos en el propio archivo.",
     tooManyFiles: 'Procesa como máximo 30 archivos por tarea.', totalSize: 'Los archivos seleccionados superan los 100 MB. Prueba con un grupo más pequeño.',
     fileSize: 'Un archivo seleccionado supera los 50 MB. Elige uno más pequeño.', invalidPdf: 'No se ha podido leer este PDF. Puede estar dañado o utilizar un formato no compatible.',
     invalidImage: 'No se ha podido leer esta imagen. Usa un archivo JPG o PNG válido.', encrypted: 'Los PDF cifrados o protegidos con contraseña no son compatibles. Utiliza una copia sin cifrar.',
@@ -171,13 +228,32 @@ const ja: Dictionary = {
   about: 'サービスについて', privacy: 'プライバシー', terms: '利用規約', contact: 'お問い合わせ', relatedTools: '関連ツール', howTo: '使い方', features: 'できること', faq: 'よくある質問',
   footerNote: '無料のPDFツール。ファイルはお使いの端末に残ります。', workingTitle: 'PDFEditNow', adNotice: '広告',
   contactNote: '公開用のサポート連絡先はまだ設定されていません。現在の状況はお問い合わせページをご覧ください。',
+  "chooseWord": "Wordファイルを選択",
+  "choosePpt": "PowerPointファイルを選択",
+  "dropWord": "ここにWord文書をドロップ",
+  "dropPpt": "ここにPowerPointファイルをドロップ",
+  "officeWordHint": "20MB以下の.docx文書を1つ選択してください",
+  "officePptHint": "20MB以下の.pptxファイルを1つ選択してください",
+  "officeNotice": "DOCX・PPTXのみを対象とした試験変換です。ページを画像としてPDFにするため、文字の選択・検索はできません。複雑なレイアウトやフォントは元の文書と異なる場合があります。旧形式の.doc・.pptには対応していません。",
+  "officeAction": "PDFに変換",
+  "trialLabel": "試験機能",
+  "officeLoading": "文書を準備しています…",
   tools: {
     'merge-pdf': { name: 'PDF結合', short: '複数のPDFを1つに', accept: 'application/pdf,.pdf' },
     'organize-pdf': { name: 'ページ編集', short: '分割・回転・削除', accept: 'application/pdf,.pdf' },
     'pdf-to-jpg': { name: 'PDFから画像', short: 'JPG・PNGで保存', accept: 'application/pdf,.pdf' },
     'jpg-to-pdf': { name: '画像からPDF', short: '画像をPDFに変換', accept: 'image/jpeg,image/png,.jpg,.jpeg,.png' },
+    "word-to-pdf": {"name": "WordからPDF", "short": "試験 · 基本的なDOCX", "accept": "application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"},
+    "ppt-to-pdf": {"name": "PPTからPDF", "short": "試験 · 基本的なPPTX", "accept": "application/vnd.openxmlformats-officedocument.presentationml.presentation,.pptx"},
   },
   errors: {
+    "officeUnsupported": "WordはDOCX、PowerPointはPPTXを選択してください。旧形式DOC・PPT、パスワード付きファイル、マクロ付きファイルには対応していません。",
+    "officeCorrupt": "Office文書を読み込めません。破損しているか、対応していない構造の可能性があります。",
+    "officeTooLarge": "20MB以下のOfficeファイルを選択してください。展開後の内容が極端に大きい文書にも対応していません。",
+    "officeRender": "ページを変換できませんでした。より簡単な文書を試し、フォント・画像・レイアウトを確認してください。",
+    "officeBrowser": "お使いのブラウザは文書の描画に必要な機能に対応していません。最新版のChrome、Edge、Firefox、Safariをお試しください。",
+    "officeLimit": "試験変換は出力50ページ・スライドまで対応します。範囲を絞るか、解像度を下げてください。",
+    "officeExternal": "試験機能では外部リンク先の素材を読み込みません。画像などの素材が文書内に埋め込まれたファイルを使用してください。",
     tooManyFiles: '1回の作業で扱うファイルを30個以下にしてください。', totalSize: '選択したファイルの合計が100MBを超えています。分けて処理してください。',
     fileSize: '50MBを超えるファイルがあります。より小さいファイルを選択してください。', invalidPdf: 'このPDFを読み込めません。破損しているか、対応していない形式の可能性があります。',
     invalidImage: 'この画像を読み込めません。有効なJPGまたはPNGファイルを選択してください。', encrypted: '暗号化されたPDFやパスワード付きPDFには対応していません。暗号化されていないコピーを使用してください。',
@@ -203,6 +279,66 @@ export function localePath(locale: Locale, path = ''): string {
 
 const content: Record<Locale, Record<Tool, ToolContent>> = {
   en: {
+    "word-to-pdf": {
+      "title": "Word to PDF locally — DOCX trial converter | PDFEditNow",
+      "description": "Convert a basic DOCX document to an image-based PDF in your browser. Choose pages and resolution, then save locally without uploading your Word file.",
+      "heading": "Try Word to PDF in your browser",
+      "intro": "Turn a basic Word document into a PDF made from page images. This trial works with DOCX files and may display complex layouts or substituted fonts differently.",
+      "steps": [
+        "Choose one DOCX file of 20 MB or less.",
+        "Choose the page range and output resolution. Leave the range empty to include every page.",
+        "Convert the document, review the result and download the PDF."
+      ],
+      "features": [
+        "Process your Word file on your device without an account or upload.",
+        "Include selected pages and choose rendering resolution.",
+        "Keep your original DOCX unchanged and save a separate image-based PDF."
+      ],
+      "faqs": [
+        {
+          "q": "Will the PDF contain selectable or searchable text?",
+          "a": "No. This trial renders each page as an image inside the PDF. Keep the original DOCX if you need editable, selectable or searchable text."
+        },
+        {
+          "q": "Which Word files can I use?",
+          "a": "Use an ordinary, unencrypted DOCX file of 20 MB or less. Older DOC files, macro-enabled documents and externally linked resources are not supported. Up to 50 output pages can be converted per task."
+        },
+        {
+          "q": "Will the layout match Microsoft Word exactly?",
+          "a": "Exact matching is not guaranteed. Fonts, page breaks, advanced tables, equations and other complex content may look different. Review the downloaded PDF before using it."
+        }
+      ]
+    },
+    "ppt-to-pdf": {
+      "title": "PPT to PDF locally — PPTX trial converter | PDFEditNow",
+      "description": "Turn basic PPTX slides into an image-based PDF without uploads. Select slides, set resolution and download a local PDF from your browser.",
+      "heading": "Try PowerPoint slides to PDF",
+      "intro": "Save the static appearance of basic PowerPoint slides as an image-based PDF. This trial accepts PPTX files and is intended for presentations with ordinary text, pictures and shapes.",
+      "steps": [
+        "Choose one PPTX presentation of 20 MB or less.",
+        "Select slides with a range such as 1-3, 5 and choose the output resolution.",
+        "Convert the slides, review the PDF and download it to your device."
+      ],
+      "features": [
+        "Convert in your browser while your presentation stays on your device.",
+        "Choose which slides to include and preserve their page proportions.",
+        "Save static slide images as a PDF without changing your original presentation."
+      ],
+      "faqs": [
+        {
+          "q": "Are animations, videos and audio included?",
+          "a": "The PDF contains static slide images. Playback, transitions, animations and interactive actions are not preserved."
+        },
+        {
+          "q": "Does the PDF keep searchable text?",
+          "a": "No. This trial creates an image-based PDF, so its text cannot be selected or searched. Keep the PPTX for editable slide content."
+        },
+        {
+          "q": "Which presentations work best?",
+          "a": "Start with an unencrypted PPTX of 20 MB or less containing ordinary text, embedded pictures and basic shapes. Older PPT files and externally linked resources are not supported. Complex fonts, charts or layouts may differ; output is limited to 50 slides per task."
+        }
+      ]
+    },
     'merge-pdf': {
       title: 'Merge PDF files locally — free PDF merger | PDFEditNow',
       description: 'Combine several PDF files into one in your browser. Arrange the files, check page counts and download your merged PDF without uploading documents.',
@@ -257,6 +393,66 @@ const content: Record<Locale, Record<Tool, ToolContent>> = {
     },
   },
   ko: {
+    "word-to-pdf": {
+      "title": "워드를 PDF로 변환 — DOCX 로컬 시험 변환 | PDFEditNow",
+      "description": "기본 DOCX 문서를 브라우저에서 이미지형 PDF로 변환하세요. 페이지와 해상도를 선택하고 워드 파일 업로드 없이 내 기기에 저장합니다.",
+      "heading": "워드 문서를 PDF로 시험 변환",
+      "intro": "기본 워드 문서의 페이지를 이미지로 담은 PDF를 만듭니다. DOCX 시험 기능이며 복잡한 문서 배치나 대체된 글꼴은 원본과 다르게 표시될 수 있습니다.",
+      "steps": [
+        "20MB 이하의 DOCX 문서 하나를 선택하세요.",
+        "페이지 범위와 출력 해상도를 정하세요. 범위를 비워 두면 모든 페이지를 포함합니다.",
+        "문서를 변환한 뒤 결과를 확인하고 PDF를 내려받으세요."
+      ],
+      "features": [
+        "회원가입이나 파일 업로드 없이 내 기기에서 처리합니다.",
+        "필요한 페이지만 선택하고 출력 해상도를 정할 수 있습니다.",
+        "원본 DOCX는 그대로 두고 별도의 이미지형 PDF를 만듭니다."
+      ],
+      "faqs": [
+        {
+          "q": "PDF의 글자를 선택하거나 검색할 수 있나요?",
+          "a": "아니요. 시험 기능은 페이지마다 이미지를 만들어 PDF에 넣습니다. 글자 수정·선택·검색이 필요하면 원본 DOCX를 보관해 주세요."
+        },
+        {
+          "q": "어떤 워드 파일을 사용할 수 있나요?",
+          "a": "20MB 이하의 일반적인 암호화되지 않은 DOCX 파일을 사용하세요. 이전 DOC 형식, 매크로 포함 문서, 외부 주소의 자료는 지원하지 않습니다. 한 작업에서 최대 50페이지를 출력할 수 있습니다."
+        },
+        {
+          "q": "Microsoft Word와 완전히 같은 모양인가요?",
+          "a": "완전히 같은 배치를 보장하지 않습니다. 글꼴, 페이지 나눔, 복잡한 표·수식 등의 표시가 달라질 수 있으므로 내려받은 PDF를 확인해 주세요."
+        }
+      ]
+    },
+    "ppt-to-pdf": {
+      "title": "PPT를 PDF로 변환 — PPTX 로컬 시험 변환 | PDFEditNow",
+      "description": "기본 PPTX 슬라이드를 업로드 없이 이미지형 PDF로 만드세요. 슬라이드 범위와 해상도를 선택하고 브라우저에서 변환해 내려받습니다.",
+      "heading": "파워포인트 슬라이드를 PDF로 시험 변환",
+      "intro": "기본 파워포인트 슬라이드의 정적인 모습을 이미지형 PDF로 저장합니다. 일반 글자, 사진, 기본 도형 중심의 PPTX 문서를 위한 시험 기능입니다.",
+      "steps": [
+        "20MB 이하의 PPTX 프레젠테이션 하나를 선택하세요.",
+        "1-3, 5처럼 포함할 슬라이드 범위와 출력 해상도를 정하세요.",
+        "변환한 PDF의 모습을 확인하고 내 기기에 내려받으세요."
+      ],
+      "features": [
+        "프레젠테이션 파일을 전송하지 않고 브라우저에서 변환합니다.",
+        "필요한 슬라이드를 선택하고 슬라이드의 가로세로 비율을 유지합니다.",
+        "원본 프레젠테이션은 변경하지 않고 정적인 슬라이드 이미지를 PDF로 만듭니다."
+      ],
+      "faqs": [
+        {
+          "q": "애니메이션, 동영상, 소리도 포함되나요?",
+          "a": "PDF에는 정적인 슬라이드 이미지만 담습니다. 재생, 전환 효과, 애니메이션과 상호작용은 유지하지 않습니다."
+        },
+        {
+          "q": "PDF에서 글자를 검색할 수 있나요?",
+          "a": "아니요. 시험 기능은 이미지형 PDF를 만들므로 글자를 선택하거나 검색할 수 없습니다. 편집할 슬라이드가 필요하면 PPTX 원본을 보관해 주세요."
+        },
+        {
+          "q": "어떤 프레젠테이션부터 사용하면 좋나요?",
+          "a": "일반 글자, 문서 안에 포함된 사진, 기본 도형이 있는 20MB 이하의 암호화되지 않은 PPTX부터 사용해 보세요. 이전 PPT 형식과 외부 주소의 자료는 지원하지 않습니다. 복잡한 글꼴·차트·배치는 달라질 수 있으며, 한 작업의 출력은 최대 50슬라이드입니다."
+        }
+      ]
+    },
     'merge-pdf': {
       title: 'PDF 합치기 — 업로드 없는 무료 PDF 병합 | PDFEditNow',
       description: '여러 PDF를 브라우저에서 하나로 합치세요. 파일 순서와 페이지 수를 확인하고 서버 업로드 없이 병합한 PDF를 내려받을 수 있습니다.',
@@ -311,6 +507,66 @@ const content: Record<Locale, Record<Tool, ToolContent>> = {
     },
   },
   es: {
+    "word-to-pdf": {
+      "title": "Word a PDF local — conversión DOCX de prueba | PDFEditNow",
+      "description": "Convierte un DOCX sencillo a un PDF de imágenes en tu navegador. Selecciona páginas y resolución y guarda el resultado sin subir el documento Word.",
+      "heading": "Prueba la conversión de Word a PDF",
+      "intro": "Crea un PDF compuesto por imágenes de las páginas de un documento Word sencillo. Esta prueba admite DOCX; los diseños complejos y las fuentes sustituidas pueden verse distintos.",
+      "steps": [
+        "Elige un documento DOCX de hasta 20 MB.",
+        "Selecciona el intervalo de páginas y la resolución. Déjalo vacío para incluir todas las páginas.",
+        "Convierte el documento, revisa el resultado y descarga el PDF."
+      ],
+      "features": [
+        "Procesa tu archivo Word en tu dispositivo sin registro ni subida.",
+        "Incluye páginas concretas y elige la resolución de salida.",
+        "Conserva el DOCX original y guarda un PDF independiente de imágenes."
+      ],
+      "faqs": [
+        {
+          "q": "¿Podré seleccionar o buscar texto en el PDF?",
+          "a": "No. Esta prueba convierte cada página en una imagen dentro del PDF. Conserva el DOCX si necesitas texto editable, seleccionable o que se pueda buscar."
+        },
+        {
+          "q": "¿Qué archivos Word se admiten?",
+          "a": "Utiliza un DOCX normal, sin cifrar y de hasta 20 MB. No se admiten DOC antiguos, documentos con macros ni recursos externos enlazados. Se pueden convertir hasta 50 páginas de salida por tarea."
+        },
+        {
+          "q": "¿El diseño será idéntico al de Microsoft Word?",
+          "a": "No se garantiza una reproducción exacta. Las fuentes, los saltos de página, las tablas avanzadas, las ecuaciones y otros elementos complejos pueden variar. Revisa el PDF descargado antes de utilizarlo."
+        }
+      ]
+    },
+    "ppt-to-pdf": {
+      "title": "PPT a PDF local — conversión PPTX de prueba | PDFEditNow",
+      "description": "Convierte diapositivas PPTX sencillas en un PDF de imágenes sin subir archivos. Selecciona diapositivas y resolución y descarga el resultado desde tu navegador.",
+      "heading": "Prueba PowerPoint a PDF",
+      "intro": "Guarda el aspecto estático de diapositivas PowerPoint sencillas como un PDF de imágenes. Esta prueba admite PPTX con texto habitual, imágenes y formas básicas.",
+      "steps": [
+        "Elige una presentación PPTX de hasta 20 MB.",
+        "Selecciona diapositivas con un intervalo como 1-3, 5 y elige la resolución.",
+        "Convierte las diapositivas, revisa el PDF y descárgalo en tu dispositivo."
+      ],
+      "features": [
+        "Convierte en el navegador mientras tu presentación permanece en tu dispositivo.",
+        "Elige las diapositivas y conserva sus proporciones.",
+        "Guarda imágenes estáticas de las diapositivas sin modificar la presentación original."
+      ],
+      "faqs": [
+        {
+          "q": "¿Se incluyen animaciones, vídeos y sonido?",
+          "a": "El PDF contiene imágenes estáticas. No conserva reproducción, transiciones, animaciones ni acciones interactivas."
+        },
+        {
+          "q": "¿Se puede buscar texto en el PDF?",
+          "a": "No. Esta prueba crea un PDF de imágenes y no permite seleccionar ni buscar texto. Conserva el PPTX para editar su contenido."
+        },
+        {
+          "q": "¿Con qué presentaciones conviene empezar?",
+          "a": "Prueba un PPTX sin cifrar de hasta 20 MB con texto normal, imágenes incorporadas y formas básicas. No se admiten PPT antiguos ni recursos externos enlazados. Las fuentes, los gráficos y los diseños complejos pueden variar; la salida se limita a 50 diapositivas por tarea."
+        }
+      ]
+    },
     'merge-pdf': {
       title: 'Unir archivos PDF gratis sin subirlos | PDFEditNow',
       description: 'Combina varios PDF en uno desde tu navegador. Ordena archivos, consulta el número de páginas y descarga el PDF unido sin subir documentos.',
@@ -365,6 +621,66 @@ const content: Record<Locale, Record<Tool, ToolContent>> = {
     },
   },
   ja: {
+    "word-to-pdf": {
+      "title": "WordからPDF — DOCXのローカル試験変換 | PDFEditNow",
+      "description": "基本的なDOCXをブラウザ内で画像形式のPDFに変換。ページ範囲と解像度を選択し、Word文書をアップロードせずに保存できます。",
+      "heading": "Word文書をPDFに試験変換",
+      "intro": "基本的なWord文書の各ページを画像としてPDFにまとめます。DOCX向けの試験機能のため、複雑なレイアウトや代替フォントは元の文書と異なる場合があります。",
+      "steps": [
+        "20MB以下のDOCX文書を1つ選択します。",
+        "ページ範囲と出力解像度を選びます。空欄の場合は全ページを含めます。",
+        "文書を変換し、結果を確認してPDFをダウンロードします。"
+      ],
+      "features": [
+        "登録やファイルのアップロードなしで端末内で処理します。",
+        "必要なページと出力解像度を選択できます。",
+        "DOCXの元ファイルは変更せず、画像形式のPDFを別に作成します。"
+      ],
+      "faqs": [
+        {
+          "q": "PDFの文字を選択・検索できますか？",
+          "a": "できません。試験機能では各ページを画像にしてPDFに収めます。文字の編集・選択・検索が必要な場合は元のDOCXを保管してください。"
+        },
+        {
+          "q": "どのWordファイルに対応していますか？",
+          "a": "20MB以下の通常の暗号化されていないDOCXを使用してください。旧形式DOC、マクロ付き文書、外部リンクの素材には対応していません。1回につき最大50ページを出力できます。"
+        },
+        {
+          "q": "Microsoft Wordと完全に同じ表示になりますか？",
+          "a": "完全に同じ表示は保証できません。フォント、改ページ、複雑な表や数式などが異なる場合があります。ダウンロードしたPDFをご確認ください。"
+        }
+      ]
+    },
+    "ppt-to-pdf": {
+      "title": "PPTからPDF — PPTXのローカル試験変換 | PDFEditNow",
+      "description": "基本的なPPTXスライドをアップロードなしで画像形式のPDFに。スライド範囲と解像度を選び、ブラウザ内で変換・保存します。",
+      "heading": "PowerPointスライドをPDFに試験変換",
+      "intro": "基本的なPowerPointスライドの静止画をPDFとして保存します。通常の文字、画像、基本図形を中心とするPPTX向けの試験機能です。",
+      "steps": [
+        "20MB以下のPPTXファイルを1つ選択します。",
+        "1-3, 5などのスライド範囲と出力解像度を選びます。",
+        "変換したPDFを確認して、端末にダウンロードします。"
+      ],
+      "features": [
+        "プレゼンテーションを送信せず、ブラウザ内で変換します。",
+        "必要なスライドを選び、元の縦横比を保ちます。",
+        "元のプレゼンテーションは変更せず、静止画のPDFを作成します。"
+      ],
+      "faqs": [
+        {
+          "q": "アニメーション、動画、音声も含まれますか？",
+          "a": "PDFにはスライドの静止画のみを収めます。再生、切り替え効果、アニメーション、操作機能は保持されません。"
+        },
+        {
+          "q": "PDFの文字を検索できますか？",
+          "a": "できません。試験機能は画像形式のPDFを作成するため、文字の選択・検索はできません。編集可能なスライドが必要な場合はPPTXを保管してください。"
+        },
+        {
+          "q": "どのような資料から試すとよいですか？",
+          "a": "通常の文字、埋め込まれた画像、基本図形を含む、20MB以下の暗号化されていないPPTXからお試しください。旧形式PPTや外部リンクの素材には対応していません。複雑なフォント・グラフ・レイアウトは異なる場合があり、出力は1回につき50スライドまでです。"
+        }
+      ]
+    },
     'merge-pdf': {
       title: 'PDF結合 — アップロード不要の無料ツール | PDFEditNow',
       description: 'ブラウザで複数のPDFを1つに結合。ファイルの順序やページ数を確認し、書類をアップロードせずに結合したPDFを保存できます。',
@@ -426,11 +742,11 @@ const legal: Record<Locale, Record<LegalSlug, LegalContent>> = {
   en: {
     about: {
       title: 'About PDFEditNow', description: 'Learn how PDFEditNow provides free browser-based PDF tools without file uploads or accounts.',
-      paragraphs: ['PDFEditNow helps you combine PDFs, organize pages, export page images and create PDFs from images. It is designed for ordinary PDF tasks in a browser, without an account or a paid conversion service.', 'The tools read files you explicitly select and process them on your device. Your originals are not modified. The result is a separate file that you choose to download.', 'Processing depends on your browser and available memory. Encrypted or damaged PDFs and unusually large tasks may not be supported. Review important output before relying on it.'],
+      paragraphs: ['PDFEditNow helps you combine PDFs, organize pages, export page images and create PDFs from images. Trial tools also convert basic DOCX documents and PPTX slides to image-based PDFs. It is designed for ordinary PDF tasks in a browser, without an account or a paid conversion service.', 'The tools read files you explicitly select and process them on your device. Your originals are not modified. The result is a separate file that you choose to download.', 'Processing depends on your browser and available memory. Encrypted or damaged PDFs and unusually large tasks may not be supported. Review important output before relying on it.'],
     },
     privacy: {
       title: 'Privacy policy', description: 'How PDFEditNow handles selected files, browser memory and website access data.',
-      paragraphs: ['Your selected PDF and image contents are processed in your browser. They are not uploaded to, stored on or converted by our servers. Generated documents and images remain in your browser until you download them or end the task.', 'Files you download are saved according to your browser settings. Closing the page releases its browser session resources; downloaded files remain on your device until you remove them. The site stores only your chosen language preference in browser local storage. Selected files and generated results are not saved to local storage or IndexedDB. On the first homepage visit, the browser’s preferred languages may select an available language automatically. Explicit language links and your saved manual choice take priority. No IP-based country lookup or geolocation API is used.', 'Delivering the website requires normal network requests. The hosting provider may process access information such as IP addresses, request times, browser details and security logs under its own policies. Local file processing does not mean that visiting the website creates no network records.', 'This version sets no cookies and includes no advertising or analytics trackers. If these services are introduced, this policy and the necessary consent controls must be updated before they are activated.', 'Do not use this service on a device or in a browser environment you do not trust. Browser extensions and other software on your device are outside this site’s control.'],
+      paragraphs: ['Your selected PDF, Office document and image contents are processed in your browser. They are not uploaded to, stored on or converted by our servers. Generated documents and images remain in your browser until you download them or end the task.', 'Files you download are saved according to your browser settings. Closing the page releases its browser session resources; downloaded files remain on your device until you remove them. The site stores only your chosen language preference in browser local storage. Selected files and generated results are not saved to local storage or IndexedDB. On the first homepage visit, the browser’s preferred languages may select an available language automatically. Explicit language links and your saved manual choice take priority. No IP-based country lookup or geolocation API is used.', 'Delivering the website requires normal network requests. The hosting provider may process access information such as IP addresses, request times, browser details and security logs under its own policies. Local file processing does not mean that visiting the website creates no network records.', 'This version sets no cookies and includes no advertising or analytics trackers. If these services are introduced, this policy and the necessary consent controls must be updated before they are activated.', 'Do not use this service on a device or in a browser environment you do not trust. Browser extensions and other software on your device are outside this site’s control.'],
     },
     terms: {
       title: 'Terms of service', description: 'Conditions for using the free browser-based tools provided by PDFEditNow.',
@@ -444,11 +760,11 @@ const legal: Record<Locale, Record<LegalSlug, LegalContent>> = {
   ko: {
     about: {
       title: 'PDFEditNow 소개', description: '회원가입이나 파일 업로드 없이 브라우저에서 사용하는 무료 PDF 도구를 소개합니다.',
-      paragraphs: ['PDFEditNow는 PDF 합치기, 페이지 편집, PDF의 이미지 변환, 이미지의 PDF 변환을 돕습니다. 회원가입이나 유료 변환 서비스 없이 일상적인 PDF 작업을 브라우저에서 할 수 있도록 설계했습니다.', '사용자가 직접 선택한 파일만 읽어 내 기기에서 처리합니다. 원본은 변경하지 않으며, 결과는 사용자가 내려받을 별도의 파일로 만듭니다.', '처리 가능 범위는 브라우저와 기기의 여유 메모리에 따라 달라집니다. 암호화·손상된 PDF나 매우 큰 작업은 지원하지 않을 수 있으므로 중요한 결과물은 직접 확인해 주세요.'],
+      paragraphs: ['PDFEditNow는 PDF 합치기, 페이지 편집, PDF의 이미지 변환, 이미지의 PDF 변환을 돕습니다. 기본 DOCX 문서와 PPTX 슬라이드를 이미지형 PDF로 만드는 시험 도구도 제공합니다. 회원가입이나 유료 변환 서비스 없이 일상적인 PDF 작업을 브라우저에서 할 수 있도록 설계했습니다.', '사용자가 직접 선택한 파일만 읽어 내 기기에서 처리합니다. 원본은 변경하지 않으며, 결과는 사용자가 내려받을 별도의 파일로 만듭니다.', '처리 가능 범위는 브라우저와 기기의 여유 메모리에 따라 달라집니다. 암호화·손상된 PDF나 매우 큰 작업은 지원하지 않을 수 있으므로 중요한 결과물은 직접 확인해 주세요.'],
     },
     privacy: {
       title: '개인정보 처리 안내', description: 'PDFEditNow의 파일 처리 방식, 브라우저 메모리 사용과 웹사이트 접속 정보를 안내합니다.',
-      paragraphs: ['선택한 PDF와 이미지의 내용은 브라우저에서 처리합니다. 파일을 운영 서버로 업로드하거나 서버에서 저장·변환하지 않습니다. 만들어진 문서와 이미지는 내려받거나 작업을 종료할 때까지 브라우저에 있습니다.', '다운로드한 파일은 브라우저 설정에 따라 저장됩니다. 페이지를 닫으면 해당 세션의 브라우저 자원이 해제되지만, 내려받은 파일은 직접 삭제할 때까지 기기에 남습니다. 브라우저 로컬 저장소에는 사용자가 선택한 언어만 보관합니다. 선택한 파일과 생성된 결과는 로컬 저장소나 IndexedDB에 저장하지 않습니다. 첫 홈페이지 방문 시 브라우저의 선호 언어를 기준으로 지원 언어를 자동 선택할 수 있습니다. 직접 선택한 언어와 명시적인 언어별 주소를 우선하며, IP 기반 국가 조회나 위치 정보 API는 사용하지 않습니다.', '웹사이트 제공을 위한 일반적인 네트워크 요청은 발생합니다. 호스팅 제공자는 자체 정책에 따라 IP 주소, 요청 시각, 브라우저 정보, 보안 로그 등의 접속 정보를 처리할 수 있습니다. 파일을 로컬에서 처리한다는 설명이 방문 기록도 전혀 남지 않는다는 의미는 아닙니다.', '현재 버전은 쿠키를 설정하지 않으며 광고나 분석 추적기를 포함하지 않습니다. 해당 서비스를 도입할 경우 적용 전에 이 안내와 필요한 동의 관리 기능을 갱신해야 합니다.', '신뢰할 수 없는 기기나 브라우저 환경에서는 이 서비스를 사용하지 마세요. 브라우저 확장 프로그램과 기기에 설치된 다른 소프트웨어는 이 사이트의 통제 범위 밖에 있습니다.'],
+      paragraphs: ['선택한 PDF, 오피스 문서, 이미지의 내용은 브라우저에서 처리합니다. 파일을 운영 서버로 업로드하거나 서버에서 저장·변환하지 않습니다. 만들어진 문서와 이미지는 내려받거나 작업을 종료할 때까지 브라우저에 있습니다.', '다운로드한 파일은 브라우저 설정에 따라 저장됩니다. 페이지를 닫으면 해당 세션의 브라우저 자원이 해제되지만, 내려받은 파일은 직접 삭제할 때까지 기기에 남습니다. 브라우저 로컬 저장소에는 사용자가 선택한 언어만 보관합니다. 선택한 파일과 생성된 결과는 로컬 저장소나 IndexedDB에 저장하지 않습니다. 첫 홈페이지 방문 시 브라우저의 선호 언어를 기준으로 지원 언어를 자동 선택할 수 있습니다. 직접 선택한 언어와 명시적인 언어별 주소를 우선하며, IP 기반 국가 조회나 위치 정보 API는 사용하지 않습니다.', '웹사이트 제공을 위한 일반적인 네트워크 요청은 발생합니다. 호스팅 제공자는 자체 정책에 따라 IP 주소, 요청 시각, 브라우저 정보, 보안 로그 등의 접속 정보를 처리할 수 있습니다. 파일을 로컬에서 처리한다는 설명이 방문 기록도 전혀 남지 않는다는 의미는 아닙니다.', '현재 버전은 쿠키를 설정하지 않으며 광고나 분석 추적기를 포함하지 않습니다. 해당 서비스를 도입할 경우 적용 전에 이 안내와 필요한 동의 관리 기능을 갱신해야 합니다.', '신뢰할 수 없는 기기나 브라우저 환경에서는 이 서비스를 사용하지 마세요. 브라우저 확장 프로그램과 기기에 설치된 다른 소프트웨어는 이 사이트의 통제 범위 밖에 있습니다.'],
     },
     terms: {
       title: '이용약관', description: 'PDFEditNow의 무료 브라우저 도구를 이용할 때 적용되는 조건입니다.',
@@ -462,11 +778,11 @@ const legal: Record<Locale, Record<LegalSlug, LegalContent>> = {
   es: {
     about: {
       title: 'Acerca de PDFEditNow', description: 'Conoce las herramientas PDF gratuitas que funcionan en el navegador sin cuentas ni subida de archivos.',
-      paragraphs: ['PDFEditNow permite unir PDF, organizar páginas, exportar imágenes y crear PDF a partir de imágenes. Está pensado para tareas habituales en el navegador, sin cuenta ni servicio de conversión de pago.', 'Las herramientas leen los archivos que seleccionas y los procesan en tu dispositivo. Los originales no cambian. El resultado es un archivo independiente que puedes descargar.', 'El procesamiento depende de tu navegador y de la memoria disponible. Los PDF cifrados o dañados y las tareas muy grandes pueden no ser compatibles. Revisa los resultados importantes antes de utilizarlos.'],
+      paragraphs: ['PDFEditNow permite unir PDF, organizar páginas, exportar imágenes y crear PDF a partir de imágenes. También ofrece herramientas de prueba para convertir DOCX y PPTX sencillos a PDF de imágenes. Está pensado para tareas habituales en el navegador, sin cuenta ni servicio de conversión de pago.', 'Las herramientas leen los archivos que seleccionas y los procesan en tu dispositivo. Los originales no cambian. El resultado es un archivo independiente que puedes descargar.', 'El procesamiento depende de tu navegador y de la memoria disponible. Los PDF cifrados o dañados y las tareas muy grandes pueden no ser compatibles. Revisa los resultados importantes antes de utilizarlos.'],
     },
     privacy: {
       title: 'Política de privacidad', description: 'Cómo trata PDFEditNow los archivos seleccionados, la memoria del navegador y los datos de acceso a la web.',
-      paragraphs: ['El contenido de los PDF e imágenes seleccionados se procesa en tu navegador. No se sube, almacena ni convierte en nuestros servidores. Los documentos e imágenes generados permanecen en el navegador hasta que los descargues o termines la tarea.', 'Los archivos descargados se guardan según la configuración de tu navegador. Al cerrar la página se liberan los recursos de la sesión; las descargas permanecen en el dispositivo hasta que las elimines. La web guarda únicamente el idioma que has elegido en el almacenamiento local del navegador. Los archivos seleccionados y los resultados no se guardan en el almacenamiento local ni en IndexedDB. En la primera visita a la página de inicio, los idiomas preferidos del navegador pueden seleccionar automáticamente un idioma disponible. Tienen prioridad los enlaces de idioma explícitos y tu elección manual guardada. No se realizan consultas de país por IP ni se utiliza una API de geolocalización.', 'Para servir la web se realizan solicitudes de red normales. El proveedor de alojamiento puede tratar direcciones IP, horas de acceso, datos del navegador y registros de seguridad conforme a sus políticas. Procesar archivos localmente no implica que la visita no deje registros de red.', 'Esta versión no establece cookies ni incluye publicidad o herramientas de seguimiento analítico. Si se incorporan, deben actualizarse esta política y los controles de consentimiento necesarios antes de activarlas.', 'No utilices el servicio en un dispositivo o navegador que no sea de confianza. Las extensiones del navegador y otro software de tu dispositivo quedan fuera del control de esta web.'],
+      paragraphs: ['El contenido de los PDF, documentos de Office e imágenes seleccionados se procesa en tu navegador. No se sube, almacena ni convierte en nuestros servidores. Los documentos e imágenes generados permanecen en el navegador hasta que los descargues o termines la tarea.', 'Los archivos descargados se guardan según la configuración de tu navegador. Al cerrar la página se liberan los recursos de la sesión; las descargas permanecen en el dispositivo hasta que las elimines. La web guarda únicamente el idioma que has elegido en el almacenamiento local del navegador. Los archivos seleccionados y los resultados no se guardan en el almacenamiento local ni en IndexedDB. En la primera visita a la página de inicio, los idiomas preferidos del navegador pueden seleccionar automáticamente un idioma disponible. Tienen prioridad los enlaces de idioma explícitos y tu elección manual guardada. No se realizan consultas de país por IP ni se utiliza una API de geolocalización.', 'Para servir la web se realizan solicitudes de red normales. El proveedor de alojamiento puede tratar direcciones IP, horas de acceso, datos del navegador y registros de seguridad conforme a sus políticas. Procesar archivos localmente no implica que la visita no deje registros de red.', 'Esta versión no establece cookies ni incluye publicidad o herramientas de seguimiento analítico. Si se incorporan, deben actualizarse esta política y los controles de consentimiento necesarios antes de activarlas.', 'No utilices el servicio en un dispositivo o navegador que no sea de confianza. Las extensiones del navegador y otro software de tu dispositivo quedan fuera del control de esta web.'],
     },
     terms: {
       title: 'Condiciones de uso', description: 'Condiciones de las herramientas gratuitas de PDFEditNow que funcionan en el navegador.',
@@ -480,11 +796,11 @@ const legal: Record<Locale, Record<LegalSlug, LegalContent>> = {
   ja: {
     about: {
       title: 'PDFEditNowについて', description: '登録やアップロードを必要としない、ブラウザで使える無料PDFツールについてご紹介します。',
-      paragraphs: ['PDFEditNowは、PDFの結合、ページ編集、画像への変換、画像からのPDF作成を支援します。アカウントや有料変換サービスを使わず、日常のPDF作業をブラウザで行えるように設計しています。', 'ユーザーが選択したファイルを読み込み、お使いの端末で処理します。元のファイルは変更しません。結果は別のファイルとして作成され、ダウンロードできます。', '処理可能な範囲はブラウザや使用可能なメモリによって異なります。暗号化・破損したPDFや非常に大きな作業には対応できない場合があります。重要な結果はご確認ください。'],
+      paragraphs: ['PDFEditNowは、PDFの結合、ページ編集、画像への変換、画像からのPDF作成を支援します。基本的なDOCX文書やPPTXスライドを画像形式のPDFにする試験ツールも用意しています。アカウントや有料変換サービスを使わず、日常のPDF作業をブラウザで行えるように設計しています。', 'ユーザーが選択したファイルを読み込み、お使いの端末で処理します。元のファイルは変更しません。結果は別のファイルとして作成され、ダウンロードできます。', '処理可能な範囲はブラウザや使用可能なメモリによって異なります。暗号化・破損したPDFや非常に大きな作業には対応できない場合があります。重要な結果はご確認ください。'],
     },
     privacy: {
       title: 'プライバシーポリシー', description: 'PDFEditNowでの選択ファイル、ブラウザメモリ、ウェブサイトへのアクセス情報の取り扱いについて。',
-      paragraphs: ['選択したPDFや画像の内容はブラウザ内で処理します。当サイトのサーバーにアップロード・保存したり、サーバーで変換したりすることはありません。生成した文書や画像は、ダウンロードまたは作業終了までブラウザ内に保持されます。', 'ダウンロードしたファイルはブラウザ設定に従って保存されます。ページを閉じるとセッションのブラウザ資源は解放されますが、保存済みファイルは削除するまで端末に残ります。ブラウザのローカルストレージには、ユーザーが選択した言語のみを保存します。選択したファイルや生成した結果をローカルストレージやIndexedDBに保存することはありません。初めてホームページにアクセスした際は、ブラウザの優先言語に基づいて対応言語を自動選択する場合があります。明示的な言語別リンクと保存された手動選択を優先します。IPアドレスによる国の照会や位置情報APIは使用しません。', 'サイトの配信には通常のネットワーク通信が必要です。ホスティング事業者は自社の方針に従い、IPアドレス、アクセス日時、ブラウザ情報、セキュリティログなどを処理する場合があります。ファイルを端末内で処理することは、訪問に関する通信記録が一切残らないことを意味しません。', '現在のバージョンはCookieを設定せず、広告やアクセス解析用トラッカーも含めていません。これらを導入する場合は、有効化前にこの方針と必要な同意管理機能を更新する必要があります。', '信頼できない端末やブラウザ環境では利用しないでください。ブラウザ拡張機能や端末上の他のソフトウェアは、当サイトの管理対象外です。'],
+      paragraphs: ['選択したPDF、Office文書、画像の内容はブラウザ内で処理します。当サイトのサーバーにアップロード・保存したり、サーバーで変換したりすることはありません。生成した文書や画像は、ダウンロードまたは作業終了までブラウザ内に保持されます。', 'ダウンロードしたファイルはブラウザ設定に従って保存されます。ページを閉じるとセッションのブラウザ資源は解放されますが、保存済みファイルは削除するまで端末に残ります。ブラウザのローカルストレージには、ユーザーが選択した言語のみを保存します。選択したファイルや生成した結果をローカルストレージやIndexedDBに保存することはありません。初めてホームページにアクセスした際は、ブラウザの優先言語に基づいて対応言語を自動選択する場合があります。明示的な言語別リンクと保存された手動選択を優先します。IPアドレスによる国の照会や位置情報APIは使用しません。', 'サイトの配信には通常のネットワーク通信が必要です。ホスティング事業者は自社の方針に従い、IPアドレス、アクセス日時、ブラウザ情報、セキュリティログなどを処理する場合があります。ファイルを端末内で処理することは、訪問に関する通信記録が一切残らないことを意味しません。', '現在のバージョンはCookieを設定せず、広告やアクセス解析用トラッカーも含めていません。これらを導入する場合は、有効化前にこの方針と必要な同意管理機能を更新する必要があります。', '信頼できない端末やブラウザ環境では利用しないでください。ブラウザ拡張機能や端末上の他のソフトウェアは、当サイトの管理対象外です。'],
     },
     terms: {
       title: '利用規約', description: 'PDFEditNowの無料ブラウザツールを利用する際の条件について。',
