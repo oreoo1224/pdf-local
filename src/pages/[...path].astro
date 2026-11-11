@@ -18,7 +18,7 @@ const {locale,route,tool,legal}=Astro.props;
 const d=getText(locale);
 const content=tool?toolContent(locale,tool):undefined;
 const info=legal?legalContent(locale,legal,!!import.meta.env.CONTACT_EMAIL):undefined;
-const title=info?.title || (route?content!.title:`${d.heroTitle} | PDF Room`);
+const title=info?.title || (route?content!.title:`${d.heroTitle} | PDFEditNow`);
 const description=info?.description || content!.description;
 const contactEmail=import.meta.env.CONTACT_EMAIL;
 ---

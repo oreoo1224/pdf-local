@@ -73,9 +73,8 @@ const isImage=tool==='jpg-to-pdf';
       <div class="actions"><a id="download" class="button primary" download><Icon name="download" size={20}/>{d.download}</a><button id="edit-again" class="button" type="button">{d.editAgain}</button><button id="start-over" class="button" type="button">{d.startOver}</button></div>
     </div>
   </div>
-  <div class="trust-row">
-    <div class="trust-item"><Icon name="shield" size={27}/><span>{d.trustLocal}</span></div>
-    <div class="trust-item"><Icon name="device" size={27}/><span>{d.trustDevice}</span></div>
-    <div class="trust-item"><Icon name="download" size={27}/><span>{d.trustDownload}</span></div>
+  <div class="save-row">
+    <button id="save-local" class="button primary save-local" type="button" disabled aria-describedby="save-local-hint"><Icon name="download" size={24}/><span>{d.trustDownload}</span></button>
+    <p id="save-local-hint" class="helper">{d.downloadPendingHelp}</p>
   </div>
 </section>

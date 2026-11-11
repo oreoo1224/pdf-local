@@ -1,14 +1,25 @@
 import { getText, type Locale, type Tool } from './i18n';
 import { sitePath } from './site-path';
+import { readSavedLanguage, resolvePreferredLocale, saveLanguage } from './language-preference';
 
-const language = document.querySelector<HTMLSelectElement>('#site-language');
-try {
-  const remembered = localStorage.getItem('pdfroom-language');
-  if (location.pathname === sitePath('/') && remembered && ['ko', 'es', 'ja'].includes(remembered)) location.replace(sitePath(`/${remembered}/`));
-} catch { /* Direct URLs and all tools work with storage disabled. */ }
-language?.addEventListener('change', () => {
-  try { localStorage.setItem('pdfroom-language', language.selectedOptions[0]?.lang || 'en'); } catch { /* Storage is optional. */ }
-  location.assign(language.value);
+let preferenceStorage: Storage | undefined;
+try { preferenceStorage=window.localStorage; } catch { /* Language selection also works without storage. */ }
+if (location.pathname === sitePath('/')) {
+  const preferred=resolvePreferredLocale(readSavedLanguage(preferenceStorage), navigator.languages?.length ? navigator.languages : [navigator.language], new URLSearchParams(location.search).get('lang'));
+  if(preferred!=='en')location.replace(`${sitePath(`/${preferred}/`)}${location.search}${location.hash}`);
+}
+const languageMenu=document.querySelector<HTMLDetailsElement>('#language-menu');
+languageMenu?.querySelectorAll<HTMLAnchorElement>('a[data-locale]').forEach(link=>{
+  link.addEventListener('click',()=>{
+    saveLanguage(preferenceStorage,link.dataset.locale as Locale);
+    languageMenu.open=false;
+  });
+});
+document.addEventListener('click',event=>{
+  if(languageMenu?.open && event.target instanceof Node && !languageMenu.contains(event.target))languageMenu.open=false;
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&languageMenu?.open){languageMenu.open=false;languageMenu.querySelector<HTMLElement>('summary')?.focus();}
 });
 
 const root = document.querySelector<HTMLElement>('[data-workspace]');
@@ -27,6 +38,8 @@ function initialize(root: HTMLElement) {
   const progressWrap = get('progress-wrap');
   const result = get('result');
   const download = get<HTMLAnchorElement>('download');
+  const saveLocal = get<HTMLButtonElement>('save-local');
+  const saveHint = get('save-local-hint');
   const isImage = tool === 'jpg-to-pdf';
   const multi = isImage || tool === 'merge-pdf';
   let files: Array<{ file: File; count: number; thumbnail?: string }> = [];
@@ -49,12 +62,20 @@ function initialize(root: HTMLElement) {
     errorBox.hidden = false;
   }
   function clearError() { errorBox.hidden = true; errorBox.textContent = ''; }
+  function updateDownloadShortcut() {
+    const ready=!!resultUrl&&!busy;
+    saveLocal.disabled=!ready;
+    saveHint.hidden=!!resultUrl;
+    if(ready)saveLocal.removeAttribute('aria-describedby');
+    else saveLocal.setAttribute('aria-describedby','save-local-hint');
+  }
   function invalidateResult() {
     if (resultUrl) URL.revokeObjectURL(resultUrl);
     resultUrl = undefined;
     download.removeAttribute('href');
     result.hidden = true;
     get('work-actions').hidden = false;
+    updateDownloadShortcut();
   }
   function updateControls() {
     if (busy) return;
@@ -69,12 +90,14 @@ function initialize(root: HTMLElement) {
     }
     get<HTMLButtonElement>('add-files').hidden = !multi;
     if (tool === 'pdf-to-jpg') get<HTMLInputElement>('quality').disabled=get<HTMLSelectElement>('output-format').value==='png';
+    updateDownloadShortcut();
   }
   function setBusy(value: boolean) {
     busy = value;
     root.setAttribute('aria-busy', String(value));
     root.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>('button,input,select').forEach(el => { el.disabled = value; });
     progressWrap.hidden = !value;
+    updateDownloadShortcut();
     if (!value) {
       renderFiles();
       if (tool === 'organize-pdf') renderPages();
@@ -94,6 +117,7 @@ function initialize(root: HTMLElement) {
     get('result-name').textContent = `${name} · ${sizeLabel(blob.size)}`;
     result.hidden = false;
     get('work-actions').hidden = true;
+    updateDownloadShortcut();
     download.focus();
   }
   function cleanup() {
@@ -317,6 +341,9 @@ function initialize(root: HTMLElement) {
   get('start-over').addEventListener('click',reset);
   get('edit-again').addEventListener('click',()=>{invalidateResult();get<HTMLButtonElement>('run-tool').focus();});
   get('run-tool').addEventListener('click',()=>{void run();});
+  saveLocal.addEventListener('click',()=>{
+    if(!busy&&resultUrl&&download.hasAttribute('href'))download.click();
+  });
   root.addEventListener('dragover',event=>{
     if(!event.dataTransfer?.types.includes('Files'))return;
     event.preventDefault();if(!busy)dropZone.classList.add('drag-over');

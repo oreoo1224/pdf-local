@@ -83,14 +83,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible {
   text-decoration:none;
   font-weight:600
 }
-.language-select {
-  border:0;
-  background:#fff;
-  color:#17233c;
-  max-width:136px;
-  padding:10px 4px;
-  cursor:pointer
-}
 .hero {
   text-align:center;
   margin:40px auto 30px;
@@ -244,22 +236,20 @@ h3 {
   font-size:12px;
   margin:4px 0 0
 }
-.trust-row {
+.save-row {
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:28px;
+  text-align:center;
+  gap:10px;
   padding:26px 0
 }
-.trust-item {
-  display:flex;
-  gap:10px;
-  align-items:center;
-  font-size:13px
-}
-.trust-item svg {
-  color:var(--blue);
-  flex-shrink:0
+.save-local {
+  min-width:240px;
+  min-height:50px;
+  max-width:100%;
+  gap:10px
 }
 .workspace {
   padding:22px 0
@@ -601,10 +591,6 @@ h3 {
 .header-right>a {
   display:none
 }
-.language-select {
-  font-size:13px;
-  max-width:104px
-}
 .hero {
   margin:28px auto 24px;
   padding:0 20px
@@ -653,21 +639,8 @@ h1 {
 .upload-panel h2 {
   font-size:21px
 }
-.trust-row {
-  gap:13px;
-  padding:22px 0;
-  align-items:flex-start
-}
-.trust-item {
-  flex:1;
-  flex-direction:column;
-  text-align:center;
-  font-size:10px;
-  gap:6px
-}
-.trust-item svg {
-  width:23px;
-  height:23px
+.save-row {
+  padding:22px 0
 }
 .file-item {
   padding:9px;

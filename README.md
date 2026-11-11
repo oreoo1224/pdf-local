@@ -1,6 +1,6 @@
-# PDF Room
+# PDFEditNow
 
-A standalone, static PDF toolbox built with Astro and TypeScript for Cloudflare Pages or GitHub Pages. **PDF Room is a working name**, and `pdf-local` is the independent project directory/repository name. A domain has not been selected or registered by this project.
+A standalone, static PDF toolbox built with Astro and TypeScript for Cloudflare Pages or GitHub Pages. **PDFEditNow is the product name**, and `pdf-local` is the independent project directory/repository name. No custom domain has been connected by this project.
 
 Live GitHub Pages preview: **https://oreoo1224.github.io/pdf-local/**. Deployment and HTTPS responses were verified on 2026-11-11. Interactive browser and mobile acceptance checks remain separate from deployment verification.
 
@@ -8,7 +8,7 @@ Live GitHub Pages preview: **https://oreoo1224.github.io/pdf-local/**. Deploymen
 
 ## What this version includes
 
-The main screen follows one simple flow: choose one of four square tool cards, select or drop files, configure the result, then download it.
+The main screen follows one simple flow: choose one of four square tool cards, select or drop files, configure the result, then download it. A single centered save button mirrors the result download and remains disabled until a converted file is ready.
 
 See the [generated design reference](docs/design-reference.png). It illustrates the intended layout; it is not a browser screenshot.
 
@@ -19,7 +19,7 @@ See the [generated design reference](docs/design-reference.png). It illustrates 
 | PDF to Image | Export selected pages as JPG or PNG; download multiple pages in a ZIP. |
 | Image to PDF | Combine JPG/JPEG and PNG images with paper size, orientation, margins, and image-fit controls. |
 
-English is the default language. Korean, Spanish, and Japanese have their own statically generated URLs. Each tool has indexable HTML content, page metadata, related tools, and instructions. Policy and information pages are included.
+English is the fallback language. Korean, Spanish, and Japanese have their own statically generated URLs. On a first visit to the homepage, the browser’s preferred languages can select a supported language automatically. A manually chosen language is remembered and takes priority; explicit localized URLs are respected. This uses no IP-country lookup or geolocation API. Each tool has indexable HTML content, page metadata, related tools, and instructions. Policy and information pages are included.
 
 This version does **not** include Word/Excel conversion, OCR, editing existing PDF text, a separate image compressor/resizer/converter, accounts, a database, advertising, or analytics. Additional image tools are future work and should not be advertised as available before implementation.
 
@@ -66,6 +66,7 @@ docs/LAUNCH.md   Deployment and public-launch checklist
 - PDF processing, image rendering, and ZIP generation use local browser memory. Downloads use generated Blob URLs.
 - The application has no database, Supabase connection, account system, or paid conversion service. No API keys are required.
 - The site and its processing assets must first be fetched from the host. Lazy-loaded modules may be fetched when a tool is first used. This version is not an installed offline app, and it does not promise that every feature works without an initial network request.
+- Browser local storage retains only the user’s manually chosen language preference. No IP-country lookup or geolocation request is made.
 - File contents are not intentionally persisted in local storage or IndexedDB. The browser and operating system control their own memory, caching, and download behavior; this is not a forensic secure-erasure guarantee.
 - The hosting provider can process normal connection information such as an IP address and request logs. The privacy policy must distinguish that from PDF or image uploads.
 
@@ -77,7 +78,7 @@ Browser memory varies by device. Safeguards bound file count, total input bytes,
 
 Current UI limits: 30 input files, 50 MB per file and 100 MB total; the page editor accepts up to 200 pages per document. PDF-to-image exports accept at most 100 selected pages per task. Source images are limited to 40 megapixels, rendered canvases to 24 megapixels, and accumulated ZIP contents to 150 MB. Lower limits may still be necessary on a memory-constrained phone. JPEG EXIF rotation and mirroring are honored without recompressing source photos.
 
-Verification for this initial repository: 94 automated PDF, localization and deploy-path tests, Astro/TypeScript diagnostics, and production-output route/metadata/link checks have passed. GitHub Pages deployment succeeded, and HTTP checks passed for all four language home pages, all four English tools, scripts, the PDF worker and SEO files. Browser UI, Canvas/PDF.js rendering and mobile downloads still need browser verification. The supplied design reference is a generated concept, not a screenshot of the running website.
+Verification for this initial repository: automated PDF, localization, language-preference and deploy-path tests, Astro/TypeScript diagnostics, and production-output route/metadata/link checks have passed. GitHub Pages deployment succeeded, and HTTP checks passed for all four language home pages, all four English tools, scripts, the PDF worker and SEO files. Browser UI, Canvas/PDF.js rendering and mobile downloads still need browser verification. The supplied design reference is a generated concept using the earlier working title, not a screenshot of the running website.
 
 Editing a PDF changes its bytes and can invalidate existing digital signatures. Preservation of interactive forms, bookmarks, attachments, accessibility structure, and other document-level features is not guaranteed. Keep the original and review important output before relying on it.
 
