@@ -1,0 +1,81 @@
+---
+import Icon from './Icon.astro';
+import { getText, type Locale, type Tool } from '../lib/i18n';
+interface Props { locale: Locale; tool: Tool; }
+const {locale,tool} = Astro.props;
+const d=getText(locale);
+const isImage=tool==='jpg-to-pdf';
+---
+<section data-workspace data-tool={tool} data-locale={locale} aria-label={d.tools[tool].name}>
+  <input id="file-input" type="file" accept={isImage?'image/jpeg,image/png,.jpg,.jpeg,.png':'application/pdf,.pdf'} multiple={tool==='merge-pdf'||isImage} hidden />
+  <div id="drop-zone" class="upload-panel">
+    <Icon name="upload" size={58} />
+    <h2>{isImage?d.dropImages:d.dropPdf}</h2>
+    <button id="choose-files" class="button primary" type="button">{isImage?d.chooseImages:d.choosePdf}</button>
+    <p class="helper">{isImage?d.imageHint:tool==='merge-pdf'?d.mergeHint:d.singleHint}</p>
+    <p class="privacy-hint"><Icon name="lock" size={15} />{d.privacyHint}</p>
+  </div>
+  <div id="tool-error" class="error" role="alert" hidden></div>
+  <div id="work-area" class="workspace" hidden>
+    <div class="toolbar">
+      <strong id="file-summary" aria-live="polite"></strong>
+      <div class="toolbar-group">
+        <button id="add-files" class="button" type="button">{d.addFiles}</button>
+        <button id="clear-files" class="button" type="button">{d.clearAll}</button>
+      </div>
+    </div>
+    <ol id="file-list" class="file-list" aria-label={d.files}></ol>
+    {tool==='organize-pdf' && <>
+      <p class="notice">{d.preserveNotice}</p>
+      <div class="range-row">
+        <label class="field grow">{d.rangeLabel}<input id="page-range" type="text" placeholder="1-3, 5, 8-10" autocomplete="off" /></label>
+        <button id="apply-range" class="button" type="button">{d.rangeApply}</button>
+      </div>
+      <p class="helper">{d.rangeHelp}</p>
+      <div class="toolbar" style="margin-top:18px">
+        <div class="toolbar-group">
+          <button id="select-all" class="button" type="button">{d.selectAll}</button>
+          <button id="deselect-all" class="button" type="button">{d.deselectAll}</button>
+          <button id="delete-selected" class="button danger" type="button">{d.deleteSelected}</button>
+        </div>
+      </div>
+      <div class="options">
+        <label class="field">{d.rotateBy}<select id="rotation-angle"><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>
+        <button id="rotate-selected" class="button" type="button">{d.rotateSelected}</button>
+        <button id="rotate-all" class="button" type="button">{d.rotateAll}</button>
+      </div>
+      <div id="pages-grid" class="pages-grid" aria-label={d.previewLabel}></div>
+    </>}
+    {tool==='pdf-to-jpg' && <div class="options">
+      <label class="field">{d.outputFormat}<select id="output-format"><option value="jpg">JPG</option><option value="png">PNG</option></select></label>
+      <label class="field">{d.resolution}<select id="resolution"><option value="1">72 DPI — {d.normal}</option><option value="2" selected>144 DPI — {d.high}</option><option value="3">216 DPI — {d.veryHigh}</option></select></label>
+      <label class="field">{d.quality} <span id="quality-value">90%</span><input id="quality" type="range" min="10" max="100" value="90" /></label>
+      <label class="field grow">{d.rangeLabel}<input id="page-range" type="text" placeholder="1-3, 5" autocomplete="off" /></label>
+      <p class="helper">{d.rangeHelp}</p>
+    </div>}
+    {tool==='jpg-to-pdf' && <div class="options">
+      <label class="field">{d.paper}<select id="paper"><option value="a4">{d.a4}</option><option value="letter">{d.letter}</option><option value="original">{d.original}</option></select></label>
+      <label class="field">{d.orientation}<select id="orientation"><option value="auto">{d.auto}</option><option value="portrait">{d.portrait}</option><option value="landscape">{d.landscape}</option></select></label>
+      <label class="field">{d.margin}<select id="margin"><option value="0">0 mm</option><option value="14.173">5 mm</option><option value="28.346" selected>10 mm</option><option value="56.693">20 mm</option></select></label>
+      <label class="field">{d.fit}<select id="fit"><option value="contain">{d.contain}</option><option value="cover">{d.cover}</option></select></label>
+    </div>}
+    <div class="progress-wrap" id="progress-wrap" hidden>
+      <div class="progress-label"><span id="progress-text" role="status">{d.processing}</span><span id="progress-value">0%</span></div>
+      <progress id="progress" value="0" max="100" aria-label={d.processing}></progress>
+    </div>
+    <div class="actions" id="work-actions">
+      <button id="run-tool" class="button primary" type="button">{tool==='merge-pdf'?d.mergeAction:tool==='organize-pdf'?d.organizeAction:tool==='pdf-to-jpg'?d.pdfImageAction:d.imageAction}</button>
+      {tool==='organize-pdf' && <button id="extract-selected" class="button" type="button">{d.extractSelected}</button>}
+      {tool==='organize-pdf' && <button id="zip-pages" class="button" type="button">{d.zipPages}</button>}
+    </div>
+    <div id="result" class="result" role="status" hidden>
+      <div id="result-name" class="result-name"></div>
+      <div class="actions"><a id="download" class="button primary" download><Icon name="download" size={20}/>{d.download}</a><button id="edit-again" class="button" type="button">{d.editAgain}</button><button id="start-over" class="button" type="button">{d.startOver}</button></div>
+    </div>
+  </div>
+  <div class="trust-row">
+    <div class="trust-item"><Icon name="shield" size={27}/><span>{d.trustLocal}</span></div>
+    <div class="trust-item"><Icon name="device" size={27}/><span>{d.trustDevice}</span></div>
+    <div class="trust-item"><Icon name="download" size={27}/><span>{d.trustDownload}</span></div>
+  </div>
+</section>

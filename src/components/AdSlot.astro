@@ -1,0 +1,6 @@
+---
+// Deliberately hidden until a real publisher and consent configuration are supplied.
+interface Props { placement: 'below-tool' | 'footer'; }
+const { placement } = Astro.props;
+---
+<aside class="ad-slot" data-ad-placement={placement} hidden aria-hidden="true"></aside>
