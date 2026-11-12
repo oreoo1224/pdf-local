@@ -20,6 +20,11 @@ const en = {
   navTools: 'PDF tools', language: 'Language', freeBadge: 'FREE · NO SIGN-UP',
   heroTitle: 'Simple PDF tools. Files stay with you.',
   heroSubtitle: 'Choose a tool, add your files, and download your result.',
+  homeTitle: 'Free PDF Tools: Convert, Merge & Organize | PDFEditGo',
+  homeDescription: 'Convert Word, Hangul, PPTX and images to PDF, merge or organize PDFs, and export JPG/PNG. Free browser tools with no account or file uploads.',
+  homeIntro: 'Choose from six tools to convert Word or Hangul documents and PowerPoint slides to PDF, merge PDFs, organize pages, create PDFs from JPG/PNG images, or export PDF pages as images. Your selected files are processed in your browser on your device, with no account or file upload. DOCX, HWP 5.0, HWPX and PPTX conversions create image-based PDFs without selectable or searchable text, and fonts or complex layouts may differ from the original.',
+  homeLabel: 'Home', breadcrumbLabel: 'Breadcrumb',
+  socialImageAlt: 'PDFEditGo — free PDF tools in your browser',
   choosePdf: 'Choose PDF files', chooseImages: 'Choose images',
   dropPdf: 'Drop your PDF files here', dropImages: 'Drop your images here',
   mergeHint: 'Select two or more PDF files to merge', singleHint: 'Choose one PDF to get started',
@@ -90,6 +95,11 @@ export type Dictionary = { [K in Exclude<keyof typeof en, 'tools' | 'errors'>]: 
 const ko: Dictionary = {
   navTools: 'PDF 도구', language: '언어', freeBadge: '무료 · 회원가입 없음',
   heroTitle: '간편한 PDF 작업. 파일은 내 기기에.', heroSubtitle: '도구를 선택하고 파일을 추가한 뒤 결과를 내려받으세요.',
+  homeTitle: '무료 PDF 도구 — 변환·합치기·페이지 편집 | PDFEditGo',
+  homeDescription: '워드·한글·PPTX·이미지를 PDF로 변환하고 PDF 합치기, 페이지 편집, JPG·PNG 저장을 이용하세요. 무료이며 회원가입이나 파일 업로드 없이 브라우저에서 처리합니다.',
+  homeIntro: '여섯 가지 도구에서 워드·한글 문서와 파워포인트의 PDF 변환, PDF 합치기, 페이지 편집, JPG·PNG의 PDF 변환, PDF의 이미지 변환 중 필요한 작업을 선택하세요. 선택한 파일은 회원가입이나 업로드 없이 내 기기의 브라우저에서 처리합니다. DOCX·HWP 5.0·HWPX·PPTX는 글자를 선택하거나 검색할 수 없는 이미지형 PDF로 변환되며, 글꼴이나 복잡한 배치는 원본과 다를 수 있습니다.',
+  homeLabel: '홈', breadcrumbLabel: '현재 위치',
+  socialImageAlt: 'PDFEditGo — 브라우저에서 사용하는 무료 PDF 도구',
   choosePdf: 'PDF 파일 선택', chooseImages: '이미지 선택', dropPdf: 'PDF 파일을 여기에 놓으세요', dropImages: '이미지를 여기에 놓으세요',
   mergeHint: '합칠 PDF 파일을 두 개 이상 선택하세요', singleHint: '작업할 PDF 파일 하나를 선택하세요', imageHint: 'JPG, JPEG 또는 PNG 이미지를 추가하세요',
   privacyHint: '브라우저에서 처리하며 파일을 업로드하지 않습니다.', trustLocal: '서버 업로드 없음', trustDevice: '내 기기에서 처리', trustDownload: '내 PC로 바로 저장',
@@ -148,6 +158,11 @@ const ko: Dictionary = {
 const es: Dictionary = {
   navTools: 'Herramientas PDF', language: 'Idioma', freeBadge: 'GRATIS · SIN REGISTRO',
   heroTitle: 'PDF sin complicaciones. Tus archivos, contigo.', heroSubtitle: 'Elige una herramienta, añade tus archivos y descarga el resultado.',
+  homeTitle: 'Herramientas PDF gratis: convertir, unir y organizar | PDFEditGo',
+  homeDescription: 'Convierte Word, Hangul, PPTX e imágenes a PDF; une y organiza PDF o expórtalos a JPG/PNG. Gratis, en tu navegador, sin cuenta ni subir archivos.',
+  homeIntro: 'Elige entre seis herramientas para convertir Word, Hangul o PowerPoint a PDF, unir PDF, organizar páginas, crear PDF con imágenes JPG/PNG o exportar páginas PDF como imágenes. Los archivos que seleccionas se procesan en el navegador de tu dispositivo, sin cuenta ni subida de archivos. Las conversiones de DOCX, HWP 5.0, HWPX y PPTX generan PDF de imágenes sin texto seleccionable ni búsquedas, y las fuentes o los diseños complejos pueden diferir del original.',
+  homeLabel: 'Inicio', breadcrumbLabel: 'Ruta de navegación',
+  socialImageAlt: 'PDFEditGo — herramientas PDF gratuitas en tu navegador',
   choosePdf: 'Elegir archivos PDF', chooseImages: 'Elegir imágenes', dropPdf: 'Arrastra tus archivos PDF aquí', dropImages: 'Arrastra tus imágenes aquí',
   mergeHint: 'Selecciona dos o más archivos PDF para unirlos', singleHint: 'Elige un PDF para empezar', imageHint: 'Añade imágenes JPG, JPEG o PNG',
   privacyHint: 'Procesado en tu navegador. Los archivos no se suben.', trustLocal: 'Sin subir archivos', trustDevice: 'Se procesa en tu dispositivo', trustDownload: 'Guarda el resultado en tu equipo',
@@ -206,6 +221,11 @@ const es: Dictionary = {
 const ja: Dictionary = {
   navTools: 'PDFツール', language: '言語', freeBadge: '無料・登録不要',
   heroTitle: 'PDFの作業を手軽に。ファイルはお手元に。', heroSubtitle: 'ツールを選び、ファイルを追加して、結果をダウンロード。',
+  homeTitle: '無料PDFツール — 変換・結合・ページ編集 | PDFEditGo',
+  homeDescription: 'Word・ハングル・PPTX・画像からPDFへの変換、PDF結合、ページ編集、JPG・PNGへの書き出しに対応。登録やアップロードなしで、ブラウザ内で無料で処理できます。',
+  homeIntro: '6つのツールから、Word・ハングル文書やPowerPointのPDF変換、PDF結合、ページ編集、JPG・PNGからのPDF作成、PDFから画像への変換を選べます。選択したファイルは、登録やアップロードなしで、お使いの端末のブラウザ内で処理します。DOCX・HWP 5.0・HWPX・PPTXは文字を選択・検索できない画像形式のPDFに変換され、フォントや複雑なレイアウトは元の文書と異なる場合があります。',
+  homeLabel: 'ホーム', breadcrumbLabel: 'パンくずリスト',
+  socialImageAlt: 'PDFEditGo — ブラウザで使える無料PDFツール',
   choosePdf: 'PDFファイルを選択', chooseImages: '画像を選択', dropPdf: 'ここにPDFファイルをドロップ', dropImages: 'ここに画像をドロップ',
   mergeHint: '結合するPDFファイルを2つ以上選択してください', singleHint: '作業するPDFを1つ選択してください', imageHint: 'JPG・JPEG・PNG画像を追加してください',
   privacyHint: 'ブラウザ内で処理。ファイルはアップロードされません。', trustLocal: 'サーバーへの送信なし', trustDevice: 'お使いの端末で処理', trustDownload: '結果を端末に直接保存',
@@ -733,6 +753,54 @@ const content: Record<Locale, Record<Tool, ToolContent>> = {
 };
 
 export function toolContent(locale: Locale, tool: Tool): ToolContent { return content[locale][tool]; }
+
+const homeInstructions: Record<Locale, Pick<ToolContent, 'steps' | 'features' | 'faqs'>> = {
+  en: {
+    steps: ['Choose the tool for your task.', 'Add supported files, then adjust the available order, page range or layout settings.', 'Run the tool, download the result and review it before use.'],
+    features: ['Convert documents and images, merge PDFs or organize their pages.', 'Work in your browser without an account or file uploads.', 'Keep your original files and save results as separate downloads.'],
+    faqs: [
+      { q: 'Are my files uploaded to a server?', a: 'No. Selected file contents are processed in your browser on your device. Loading the website and its processing code still requires normal network requests.' },
+      { q: 'Which file formats are supported?', a: 'Use PDF for merging, page organization or image export; JPG, JPEG or PNG to create a PDF; DOCX, HWP 5.0 or HWPX for Word/Hangul conversion; and PPTX for PowerPoint conversion. Older DOC and PPT files are not supported.' },
+      { q: 'What file and page limits apply?', a: 'Office conversion accepts one document up to 20 MB and outputs up to 50 pages or slides per task. Multi-file PDF and image tasks allow up to 30 files, 50 MB each and 100 MB total; the page editor supports up to 200 pages. Device memory can impose lower practical limits.' },
+      { q: 'Can I edit or recognize text?', a: 'The PDF organizer changes whole pages, not the text or objects inside them. No tool performs OCR. Word, Hangul and PowerPoint conversions create image-based PDFs without selectable or searchable text; keep the originals for text editing.' },
+    ],
+  },
+  ko: {
+    steps: ['필요한 작업에 맞는 도구를 선택하세요.', '지원하는 파일을 추가하고 도구에 따라 순서, 페이지 범위 또는 배치를 설정하세요.', '작업을 실행하고 결과를 내려받은 뒤 내용을 확인하세요.'],
+    features: ['문서·이미지 변환, PDF 합치기와 페이지 정리를 지원합니다.', '회원가입이나 파일 업로드 없이 브라우저에서 작업합니다.', '원본 파일은 보관하고 결과를 별도 파일로 내려받습니다.'],
+    faqs: [
+      { q: '파일이 서버로 업로드되나요?', a: '아니요. 선택한 파일의 내용은 내 기기의 브라우저에서 처리합니다. 웹사이트와 처리 코드를 불러오기 위한 일반적인 네트워크 요청은 발생합니다.' },
+      { q: '어떤 파일 형식을 지원하나요?', a: '합치기·페이지 편집·이미지 저장은 PDF, 이미지의 PDF 변환은 JPG·JPEG·PNG를 지원합니다. 워드·한글 변환은 DOCX·HWP 5.0·HWPX, 파워포인트 변환은 PPTX를 사용하세요. 이전 DOC·PPT 형식은 지원하지 않습니다.' },
+      { q: '파일 크기와 페이지 수에 제한이 있나요?', a: '문서 변환은 20MB 이하 파일 하나를 받아 작업당 최대 50페이지 또는 슬라이드를 출력합니다. 여러 파일을 다루는 PDF·이미지 작업은 최대 30개 파일, 파일당 50MB, 합계 100MB까지이며 페이지 편집은 최대 200페이지를 지원합니다. 기기의 메모리에 따라 실제 처리 범위가 더 작을 수 있습니다.' },
+      { q: '글자를 수정하거나 인식할 수 있나요?', a: 'PDF 페이지 편집은 페이지 전체를 정리하며 내부 글자나 개체를 수정하지 않습니다. OCR 기능은 제공하지 않습니다. 워드·한글·파워포인트 변환 결과는 글자를 선택하거나 검색할 수 없는 이미지형 PDF이므로 글자 편집에는 원본을 보관해 사용하세요.' },
+    ],
+  },
+  es: {
+    steps: ['Elige la herramienta para tu tarea.', 'Añade archivos compatibles y ajusta el orden, las páginas o el diseño disponibles.', 'Ejecuta la herramienta, descarga el resultado y revísalo antes de usarlo.'],
+    features: ['Convierte documentos e imágenes, une PDF u organiza sus páginas.', 'Trabaja en el navegador sin cuenta ni subida de archivos.', 'Conserva los originales y descarga los resultados como archivos independientes.'],
+    faqs: [
+      { q: '¿Se suben mis archivos a un servidor?', a: 'No. El contenido de los archivos seleccionados se procesa en el navegador de tu dispositivo. Cargar la web y su código de procesamiento sí requiere solicitudes de red normales.' },
+      { q: '¿Qué formatos se admiten?', a: 'Usa PDF para unir, organizar páginas o exportar imágenes; JPG, JPEG o PNG para crear un PDF; DOCX, HWP 5.0 o HWPX para convertir Word/Hangul; y PPTX para convertir PowerPoint. No se admiten los formatos DOC y PPT antiguos.' },
+      { q: '¿Qué límites de archivos y páginas hay?', a: 'La conversión de documentos acepta un archivo de hasta 20 MB y genera hasta 50 páginas o diapositivas por tarea. Las tareas con varios PDF o imágenes admiten hasta 30 archivos, 50 MB por archivo y 100 MB en total; el editor admite hasta 200 páginas. La memoria del dispositivo puede reducir estos límites prácticos.' },
+      { q: '¿Puedo editar o reconocer texto?', a: 'El organizador modifica páginas completas, no su texto ni sus objetos. Ninguna herramienta realiza OCR. Las conversiones de Word, Hangul y PowerPoint generan PDF de imágenes sin texto seleccionable ni búsquedas; conserva los originales para editar el texto.' },
+    ],
+  },
+  ja: {
+    steps: ['作業に合うツールを選びます。', '対応ファイルを追加し、ツールに応じて順序、ページ範囲、配置などを設定します。', '処理を実行して結果をダウンロードし、内容を確認します。'],
+    features: ['文書や画像の変換、PDFの結合、ページの整理に対応します。', '登録やファイルのアップロードなしで、ブラウザ内で作業できます。', '元のファイルを保管し、結果を別のファイルとして保存できます。'],
+    faqs: [
+      { q: 'ファイルはサーバーにアップロードされますか？', a: 'いいえ。選択したファイルの内容は、お使いの端末のブラウザ内で処理します。サイトと処理コードの読み込みには通常のネットワーク通信が必要です。' },
+      { q: 'どの形式に対応していますか？', a: '結合・ページ編集・画像への書き出しはPDF、PDF作成用の画像はJPG・JPEG・PNGに対応します。Word・ハングル変換にはDOCX・HWP 5.0・HWPX、PowerPoint変換にはPPTXを使用してください。旧形式のDOC・PPTには対応していません。' },
+      { q: 'ファイル容量やページ数の上限はありますか？', a: '文書変換は20MB以下のファイル1つから、1回につき最大50ページ・スライドを出力できます。複数のPDF・画像を扱う作業は最大30ファイル、1ファイル50MB、合計100MBまでで、ページ編集は最大200ページに対応します。端末のメモリによっては処理可能な範囲がさらに小さくなります。' },
+      { q: '文字の編集や認識はできますか？', a: 'ページ編集はページ全体を整理する機能で、内部の文字やオブジェクトは変更しません。OCR機能はありません。Word・ハングル・PowerPointの変換結果は文字を選択・検索できない画像形式のPDFになるため、文字の編集用に元の文書を保管してください。' },
+    ],
+  },
+};
+
+export function homeContent(locale: Locale): ToolContent {
+  const d = getText(locale);
+  return { title: d.homeTitle, description: d.homeDescription, heading: d.heroTitle, intro: d.homeIntro, ...homeInstructions[locale] };
+}
 
 const legal: Record<Locale, Record<LegalSlug, LegalContent>> = {
   en: {

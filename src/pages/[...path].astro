@@ -3,7 +3,7 @@ import Site from '../layouts/Site.astro';
 import ToolCards from '../components/ToolCards.astro';
 import Workspace from '../components/Workspace.astro';
 import AdSlot from '../components/AdSlot.astro';
-import { locales, tools, getText, localePath, toolContent, legalContent, type Locale, type Tool } from '../lib/i18n';
+import { locales, tools, getText, localePath, toolContent, homeContent, legalContent, type Locale, type Tool } from '../lib/i18n';
 import { sitePath } from '../lib/site-path';
 export function getStaticPaths() {
   const legal=['about','privacy','terms','contact'] as const;
@@ -16,13 +16,14 @@ export function getStaticPaths() {
 interface Props { locale:Locale; route:string; tool?:Tool; legal?:'about'|'privacy'|'terms'|'contact'; }
 const {locale,route,tool,legal}=Astro.props;
 const d=getText(locale);
-const content=tool?toolContent(locale,tool):undefined;
-const info=legal?legalContent(locale,legal,!!import.meta.env.CONTACT_EMAIL):undefined;
-const title=info?.title || (route?content!.title:`${d.heroTitle} | PDFEditGo`);
+const content=tool?(route?toolContent(locale,tool):homeContent(locale)):undefined;
+const contactEmail=import.meta.env.CONTACT_EMAIL?.trim();
+const info=legal?legalContent(locale,legal,!!contactEmail):undefined;
+const title=info?.title || content!.title;
 const description=info?.description || content!.description;
-const contactEmail=import.meta.env.CONTACT_EMAIL;
 ---
-<Site locale={locale} title={title} description={description} route={route} application={!!tool}>
+<Site locale={locale} title={title} description={description} route={route} tool={route?tool:undefined} features={content?.features} pageLabel={tool?d.tools[tool].name:info?.title}>
+  {route && <nav class="breadcrumbs" aria-label={d.breadcrumbLabel}><ol><li><a href={`${sitePath(localePath(locale))}${locale==='en'?'?lang=en':''}`}>{d.homeLabel}</a></li><li><span aria-current="page">{tool?d.tools[tool].name:info?.title}</span></li></ol></nav>}
   {tool && content ? <>
     <div class="hero">
       <span class="badge">{d.freeBadge}</span>
@@ -35,6 +36,7 @@ const contactEmail=import.meta.env.CONTACT_EMAIL;
       <AdSlot placement="below-tool"/>
     </div>
     <article class="content-section">
+      {!route && <p class="home-overview">{d.homeIntro}</p>}
       <h2>{d.howTo}</h2>
       <ol class="steps">{content.steps.map(step=><li>{step}</li>)}</ol>
       <h2>{d.features}</h2>

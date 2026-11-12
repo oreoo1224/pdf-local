@@ -2,19 +2,15 @@
 import '../styles/global.css';
 import Icon from '../components/Icon.astro';
 import LanguageMenu from '../components/LanguageMenu.astro';
-import { getText, locales, localePath, type Locale } from '../lib/i18n';
+import { getText, localePath, type Locale, type Tool } from '../lib/i18n';
 import { sitePath } from '../lib/site-path';
-interface Props { locale: Locale; title: string; description: string; route?: string; application?: boolean; }
-const { locale, title, description, route = '', application = false } = Astro.props;
+import { createPageSeo } from '../lib/seo';
+interface Props { locale: Locale; title: string; description: string; route?: string; tool?: Tool; features?: string[]; pageLabel?: string; }
+const { locale, title, description, route = '', tool, features=[], pageLabel } = Astro.props;
 const d = getText(locale);
 const homeHref = `${sitePath(localePath(locale))}${locale==='en'?'?lang=en':''}`;
-const canonical = Astro.site ? new URL(sitePath(localePath(locale, route)), Astro.site).href : undefined;
-const schema = application ? {
-  '@context': 'https://schema.org', '@type': 'WebApplication', name: title,
-  description, ...(canonical ? {url:canonical} : {}), applicationCategory: 'UtilitiesApplication',
-  operatingSystem: 'Web browser', browserRequirements: 'JavaScript and a modern web browser',
-  inLanguage: locale, offers: {'@type':'Offer',price:'0',priceCurrency:'USD'},
-} : undefined;
+const seo=createPageSeo({site:Astro.site,base:import.meta.env.BASE_URL,locale,route,title,description,tool,features,pageLabel,contactEmail:import.meta.env.CONTACT_EMAIL});
+const verification=import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
 ---
 <!doctype html>
 <html lang={locale}>
@@ -23,18 +19,31 @@ const schema = application ? {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={seo.robots} />
+    {verification && <meta name="google-site-verification" content={verification} />}
     <meta name="theme-color" content="#1558e8" />
     <link rel="icon" type="image/svg+xml" href={sitePath('/favicon.svg')} />
-    {canonical && <link rel="canonical" href={canonical} />}
-    {Astro.site && locales.map(lang => <link rel="alternate" hreflang={lang} href={new URL(sitePath(localePath(lang,route)),Astro.site).href} />)}
-    {Astro.site && <link rel="alternate" hreflang="x-default" href={new URL(sitePath(localePath('en',route)),Astro.site).href} />}
+    {seo.canonical && <link rel="canonical" href={seo.canonical} />}
+    {seo.alternates.map(({locale:lang,href}) => <link rel="alternate" hreflang={lang} href={href} />)}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="PDFEditGo" />
-    {canonical && <meta property="og:url" content={canonical} />}
-    <meta name="twitter:card" content="summary" />
-    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g,'\\u003c')} />}
+    <meta property="og:locale" content={seo.ogLocale}/>
+    {seo.ogAlternateLocales.map(lang=><meta property="og:locale:alternate" content={lang}/>)}
+    {seo.canonical && <meta property="og:url" content={seo.canonical} />}
+    {seo.image && <>
+      <meta property="og:image" content={seo.image}/>
+      <meta property="og:image:type" content="image/png"/>
+      <meta property="og:image:width" content="1200"/>
+      <meta property="og:image:height" content="630"/>
+      <meta property="og:image:alt" content={d.socialImageAlt}/>
+    </>}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title}/>
+    <meta name="twitter:description" content={description}/>
+    {seo.image && <><meta name="twitter:image" content={seo.image}/><meta name="twitter:image:alt" content={d.socialImageAlt}/></>}
+    {seo.structuredData && <script type="application/ld+json" set:html={JSON.stringify(seo.structuredData).replace(/</g,'\\u003c')} />}
   </head>
   <body>
     <a class="skip" href="#main">{d.skipToContent}</a>
@@ -42,7 +51,7 @@ const schema = application ? {
       <a class="brand" href={homeHref}><Icon name="logo" size={34} />PDFEditGo</a>
       <nav class="header-right" aria-label={d.navTools}>
         <a href={`${homeHref}#tools`}>{d.navTools}</a>
-        <LanguageMenu locale={locale} route={route} />
+        <LanguageMenu locale={locale} route={route==='404'?'':route} />
       </nav>
     </header>
     <main id="main"><slot /></main>

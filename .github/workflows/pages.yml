@@ -38,6 +38,7 @@ jobs:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           SITE_BASE: ${{ steps.pages.outputs.base_path || '/' }}
           CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.PUBLIC_GOOGLE_SITE_VERIFICATION }}
         run: |
           npm run build
           npm run check:build
