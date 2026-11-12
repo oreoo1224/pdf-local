@@ -1,34 +1,16 @@
 import type { HwpDocument } from '@rhwp/core';
 import type { HangulDocumentLoader } from './hangul';
+import type { RasterPage } from './pdf-raster';
+import { loadDocumentFonts } from './document-fonts';
 import { OfficeToolError } from './office-errors';
 
 type Core = typeof import('@rhwp/core');
 let corePromise: Promise<Core> | undefined;
-let fontPromise: Promise<void> | undefined;
 let measureCanvas: HTMLCanvasElement | undefined;
 const MAX_PIXELS = 12_000_000;
 
-async function prepareFonts(): Promise<void> {
-  if (typeof FontFace === 'undefined' || !document.fonts) return;
-  fontPromise ??= (async () => {
-    const existing = Array.from(document.fonts).filter(face => face.status === 'loaded').map(face => face.family.replace(/["']/g, ''));
-    const families = ['Noto Sans KR', 'Noto Serif KR'].filter(family => !existing.includes(family));
-    if (!families.length) return;
-    const response = await fetch(new URL(`${import.meta.env.BASE_URL}fonts/NotoSansKR.ttf`, window.location.href));
-    if (!response.ok) throw new OfficeToolError('officeRender');
-    const bytes = await response.arrayBuffer();
-    for (const family of families) {
-      const face = new FontFace(family, bytes, { weight: '100 900' });
-      await face.load();
-      document.fonts.add(face);
-    }
-  })().catch(error => { fontPromise = undefined; throw error; });
-  return fontPromise;
-}
-
 async function loadCore(): Promise<Core> {
   if (typeof document === 'undefined' || typeof WebAssembly === 'undefined') throw new OfficeToolError('officeBrowser');
-  await prepareFonts();
   // rhwp's browser layout callback measures against the same locally available
   // Canvas fonts used for painting. No file or text leaves the page.
   measureCanvas ??= document.createElement('canvas');
@@ -38,13 +20,20 @@ async function loadCore(): Promise<Core> {
     context.font = font;
     return context.measureText(text).width;
   };
+  const fonts = loadDocumentFonts();
   corePromise ??= (async () => {
     const core = await import('@rhwp/core');
     const url = new URL(`${import.meta.env.BASE_URL}hangul/rhwp_bg.wasm`, window.location.href).href;
     await core.default({ module_or_path: url });
     return core;
   })().catch(error => { corePromise = undefined; throw error; });
-  return corePromise;
+  const [core] = await Promise.all([corePromise, fonts]);
+  return core;
+}
+
+/** Prepare shared assets without opening or retaining any document bytes. */
+export async function warmupBrowserHangul(): Promise<void> {
+  await loadCore();
 }
 
 function pageDimensions(source: HwpDocument, page: number): { widthPt: number; heightPt: number; widthPx: number; heightPx: number } {
@@ -66,6 +55,15 @@ function canvasPng(canvas: HTMLCanvasElement): Promise<Uint8Array> {
   });
 }
 
+function canvasPixels(canvas: HTMLCanvasElement): RasterPage {
+  const { width, height } = canvas;
+  if (![width, height].every(value => Number.isSafeInteger(value) && value > 0 && value <= 16_384)
+    || width * height > MAX_PIXELS) throw new OfficeToolError('officeLimit');
+  const context = canvas.getContext('2d');
+  if (!context) throw new OfficeToolError('officeBrowser');
+  return { width, height, data: context.getImageData(0, 0, width, height).data };
+}
+
 export const loadBrowserHangul: HangulDocumentLoader = async bytes => {
   const core = await loadCore();
   const canvas = document.createElement('canvas');
@@ -79,18 +77,29 @@ export const loadBrowserHangul: HangulDocumentLoader = async bytes => {
     if (!Array.isArray(external) || external.length) throw new OfficeToolError('officeExternal');
     source.setFallbackFont('Noto Sans KR');
     const documentSource = source;
+    const render = (page: number, width: number) => {
+      const dimensions = pageDimensions(documentSource, page);
+      const scale = width / dimensions.widthPx;
+      const widthPx = Math.ceil(dimensions.widthPx * scale), heightPx = Math.ceil(dimensions.heightPx * scale);
+      if (![widthPx, heightPx].every(value => Number.isSafeInteger(value) && value > 0 && value <= 16_384)
+        || widthPx * heightPx > MAX_PIXELS) throw new OfficeToolError('officeLimit');
+      // Canvas output avoids inserting untrusted SVG/HTML into the DOM and
+      // uses the already-loaded local font set.
+      documentSource.renderPageToCanvas(page, canvas, scale);
+    };
     return {
       pageCount: documentSource.pageCount(),
       pageSize: page => pageDimensions(documentSource, page),
       async renderPage(page, width) {
         try {
-          const dimensions = pageDimensions(documentSource, page);
-          const scale = width / dimensions.widthPx;
-          if (Math.ceil(dimensions.widthPx * scale) * Math.ceil(dimensions.heightPx * scale) > MAX_PIXELS) throw new OfficeToolError('officeLimit');
-          // Canvas output avoids inserting untrusted SVG/HTML into the DOM and
-          // uses the already-loaded local font set.
-          documentSource.renderPageToCanvas(page, canvas, scale);
+          render(page, width);
           return await canvasPng(canvas);
+        } finally { canvas.width = 0; canvas.height = 0; }
+      },
+      async renderPagePixels(page, width) {
+        try {
+          render(page, width);
+          return canvasPixels(canvas);
         } finally { canvas.width = 0; canvas.height = 0; }
       },
       destroy() { documentSource.free(); canvas.width = 0; canvas.height = 0; },

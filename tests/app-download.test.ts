@@ -5,10 +5,12 @@ import { getText } from '../src/lib/i18n';
 const engines = vi.hoisted(() => ({
   validateWordFile: vi.fn(async () => 'hwp'),
   wordToPdf: vi.fn(),
+  warmupBrowserHangul: vi.fn(async()=>{}),
 }));
 
 vi.mock('../src/lib/pdf', () => ({}));
 vi.mock('../src/lib/word', () => engines);
+vi.mock('../src/lib/hangul-browser', () => ({warmupBrowserHangul:engines.warmupBrowserHangul}));
 
 /** A small event/attribute fixture for the production app controller. It does
  * not emulate navigation, Safari's download policy, or the native share sheet. */
@@ -107,6 +109,7 @@ describe('completed local results and mobile saving', () => {
     vi.resetModules();
     engines.validateWordFile.mockClear();
     engines.wordToPdf.mockReset();
+    engines.warmupBrowserHangul.mockReset().mockResolvedValue(undefined);
     output = new Blob(['%PDF-1.7\nlocal-conversion-result'], { type: 'application/pdf' });
     const hwpBytes = new Uint8Array(readFileSync(new URL('./fixtures/simple.hwp', import.meta.url)));
     input = new File([hwpBytes.buffer], 'sample.hwp');
@@ -180,6 +183,21 @@ describe('completed local results and mobile saving', () => {
     expect(fixture.get('work-actions').hidden).toBe(false);
     expect(fixture.get('run-tool').disabled).toBe(false);
   }
+
+  it('prepares the Hangul runtime before conversion without passing document contents',async()=>{
+    await chooseFile();
+    await vi.waitFor(()=>expect(engines.warmupBrowserHangul).toHaveBeenCalledOnce());
+    expect(engines.warmupBrowserHangul).toHaveBeenCalledWith();
+    expect(engines.wordToPdf).not.toHaveBeenCalled();
+    expect(fixture.get('save-local').disabled).toBe(true);
+  });
+
+  it('keeps conversion usable when optional runtime preparation fails',async()=>{
+    engines.warmupBrowserHangul.mockRejectedValueOnce(new Error('Optional preparation failed'));
+    const url=await convert();
+    expectReady(url);
+    expect(fixture.get('tool-error').hidden).toBe(true);
+  });
 
   it.each([
     ['office-resolution', '2'],

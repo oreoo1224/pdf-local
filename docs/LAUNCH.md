@@ -25,6 +25,7 @@ Automated tests cover specific inputs; they do not establish that every PDF or e
 - JPG/PNG conversion exports the selected pages, honors the available quality/resolution controls, and generates a valid ZIP for multiple pages.
 - Images become a correctly oriented PDF with the selected paper, margins, and fit.
 - Basic DOCX, supported HWP 5.0, HWPX and PPTX samples produce a valid image-based PDF with the expected page/slide order and dimensions. The first card detects Word versus Hangul input and executes only the matching converter. Check English and CJK text, a small table, pictures and basic shapes against the originals.
+- Compare document conversion duration at the same resolution on the same device, distinguishing initial asset loading from repeated conversions. Verify transparent artwork and page colors in the direct pixel PDF output. Review [the reproducible performance comparison](PERFORMANCE.md); NodeCanvas measurements are not an iPhone benchmark.
 - Document pages clearly explain that text is not selectable/searchable, complex layouts and fonts can differ, and legacy `.doc`/`.ppt`, HWP 3.x and unsupported protection/encryption are not supported. Verify the 20 MB input and 50-page/slide task limits and error handling for corrupt, encrypted, wrong-format and externally linked content. Do not equate a small file with guaranteed compatibility.
 - Damaged, encrypted, unsupported, and oversized files produce understandable errors.
 - New jobs and removed files release previews; old results do not replace a newer in-progress job.

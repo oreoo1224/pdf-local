@@ -1,29 +1,9 @@
 import type { OfficeDocumentLoader, OfficeRenderDocument } from './office';
+import type { RasterPage } from './pdf-raster';
+import { loadDocumentFonts } from './document-fonts';
 import { OfficeToolError } from './office-errors';
 
 const MAX_PIXELS = 12_000_000;
-let fontPromise: Promise<void> | undefined;
-
-async function loadLocalFonts(): Promise<void> {
-  if (typeof FontFace === 'undefined' || !document.fonts) return;
-  fontPromise ??= (async () => {
-    const existing=Array.from(document.fonts).filter(face=>face.status==='loaded').map(face=>face.family.replace(/["']/g,''));
-    const families=['Noto Sans KR','Noto Serif KR'].filter(family=>!existing.includes(family));
-    if(!families.length)return;
-    const response = await fetch(`${import.meta.env.BASE_URL}fonts/NotoSansKR.ttf`);
-    if (!response.ok) throw new OfficeToolError('officeRender');
-    const bytes = await response.arrayBuffer();
-    // The renderer's regional fallback chains include these families. The
-    // second alias substitutes a sans face for an unavailable CJK serif face;
-    // the interface clearly discloses font/layout differences.
-    for (const family of families) {
-      const face = new FontFace(family, bytes, { weight: '100 900' });
-      await face.load();
-      document.fonts.add(face);
-    }
-  })().catch(error => { fontPromise = undefined; throw error; });
-  return fontPromise;
-}
 
 function pngBytes(canvas: HTMLCanvasElement): Promise<Uint8Array> {
   if (!canvas.width || !canvas.height || canvas.width * canvas.height > MAX_PIXELS) throw new OfficeToolError('officeLimit');
@@ -35,9 +15,18 @@ function pngBytes(canvas: HTMLCanvasElement): Promise<Uint8Array> {
   });
 }
 
+function canvasPixels(canvas: HTMLCanvasElement): RasterPage {
+  const { width, height } = canvas;
+  if (![width, height].every(value => Number.isSafeInteger(value) && value > 0 && value <= 16_384)
+    || width * height > MAX_PIXELS) throw new OfficeToolError('officeLimit');
+  const context = canvas.getContext('2d');
+  if (!context) throw new OfficeToolError('officeBrowser');
+  return { width, height, data: context.getImageData(0, 0, width, height).data };
+}
+
 export const loadBrowserOffice: OfficeDocumentLoader = async (bytes, kind) => {
   if (typeof document === 'undefined' || typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') throw new OfficeToolError('officeBrowser');
-  await loadLocalFonts();
+  await loadDocumentFonts();
   const canvas = document.createElement('canvas');
   const common = {
     mode: 'main' as const,
@@ -61,6 +50,12 @@ export const loadBrowserOffice: OfficeDocumentLoader = async (bytes, kind) => {
             return await pngBytes(canvas);
           } finally { canvas.width = 0; canvas.height = 0; }
         },
+        async renderPagePixels(index, widthPx) {
+          try {
+            await source.renderPage(canvas, index, { width: widthPx, dpr: 1, imageResources: { decodedByteBudget: 48 * 1024 * 1024, strategy: 'strict' } });
+            return canvasPixels(canvas);
+          } finally { canvas.width = 0; canvas.height = 0; }
+        },
         destroy() { source.destroy(); canvas.width = 0; canvas.height = 0; },
       };
       return adapter;
@@ -74,6 +69,12 @@ export const loadBrowserOffice: OfficeDocumentLoader = async (bytes, kind) => {
         try {
           await source.renderSlide(canvas, index, { width: widthPx, dpr: 1, imageResources: { decodedByteBudget: 48 * 1024 * 1024, strategy: 'strict' } });
           return await pngBytes(canvas);
+        } finally { canvas.width = 0; canvas.height = 0; }
+      },
+      async renderPagePixels(index, widthPx) {
+        try {
+          await source.renderSlide(canvas, index, { width: widthPx, dpr: 1, imageResources: { decodedByteBudget: 48 * 1024 * 1024, strategy: 'strict' } });
+          return canvasPixels(canvas);
         } finally { canvas.width = 0; canvas.height = 0; }
       },
       destroy() { source.destroy(); canvas.width = 0; canvas.height = 0; },

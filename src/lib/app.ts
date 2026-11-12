@@ -310,6 +310,11 @@ function initialize(root: HTMLElement) {
             const {validateWordFile}=await import('./word');
             const format=await validateWordFile(file);
             accepted.push({file,count:0,format});
+            if(format==='hwp'||format==='hwpx'){
+              // Load only local runtime assets while the user adjusts options.
+              // The converter retries preparation if this optional warmup fails.
+              void import('./hangul-browser').then(module=>module.warmupBrowserHangul()).catch(()=>{});
+            }
           }else{
             const {validateOfficeFile}=await import('./office');
             await validateOfficeFile(file,'pptx');
