@@ -79,7 +79,15 @@ const accept=isOffice?d.tools[tool].accept:isImage?'image/jpeg,image/png,.jpg,.j
     </div>
     <div id="result" class="result" role="status" hidden>
       <div id="result-name" class="result-name"></div>
-      <div class="actions"><a id="download" class="button primary" download><Icon name="download" size={20}/>{d.download}</a><button id="edit-again" class="button" type="button">{d.editAgain}</button><button id="start-over" class="button" type="button">{d.startOver}</button></div>
+      <div class="actions">
+        <a id="download" class="button primary" download target="_blank" rel="noopener"><Icon name="download" size={20}/>{d.download}</a>
+        <button id="share-result" class="button" type="button" hidden>{d.saveOrShare}</button>
+        <a id="open-result" class="button" target="_blank" rel="noopener">{d.openResult}</a>
+        <button id="edit-again" class="button" type="button">{d.editAgain}</button>
+        <button id="start-over" class="button" type="button">{d.startOver}</button>
+      </div>
+      <p id="result-save-help" class="helper">{d.saveResultHelp}</p>
+      <p id="save-error" class="error" role="alert" hidden></p>
     </div>
   </div>
   <div class="save-row">

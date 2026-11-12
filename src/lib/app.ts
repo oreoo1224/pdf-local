@@ -1,6 +1,7 @@
 import { getText, type Locale, type Tool } from './i18n';
 import { sitePath } from './site-path';
 import { readSavedLanguage, resolvePreferredLocale, saveLanguage } from './language-preference';
+import { canShareFile, createShareFile, shareResultFile } from './result-download';
 
 let preferenceStorage: Storage | undefined;
 try { preferenceStorage=window.localStorage; } catch { /* Language selection also works without storage. */ }
@@ -38,6 +39,9 @@ function initialize(root: HTMLElement) {
   const progressWrap = get('progress-wrap');
   const result = get('result');
   const download = get<HTMLAnchorElement>('download');
+  const shareResult = get<HTMLButtonElement>('share-result');
+  const openResult = get<HTMLAnchorElement>('open-result');
+  const saveError = get('save-error');
   const saveLocal = get<HTMLButtonElement>('save-local');
   const saveHint = get('save-local-hint');
   const isImage = tool === 'jpg-to-pdf';
@@ -51,6 +55,9 @@ function initialize(root: HTMLElement) {
   let busy = false;
   let revision = 0;
   let resultUrl: string | undefined;
+  let resultFile: File | undefined;
+  let resultShareable = false;
+  let shareInFlight = false;
   let previewAbort: AbortController | undefined;
   let previewCleanup: (() => void) | undefined;
   let draggedFile: number | undefined;
@@ -67,6 +74,8 @@ function initialize(root: HTMLElement) {
   function updateDownloadShortcut() {
     const ready=!!resultUrl&&!busy;
     saveLocal.disabled=!ready;
+    shareResult.hidden=!resultShareable;
+    shareResult.disabled=!ready||shareInFlight;
     saveHint.hidden=!!resultUrl;
     if(ready)saveLocal.removeAttribute('aria-describedby');
     else saveLocal.setAttribute('aria-describedby','save-local-hint');
@@ -74,7 +83,12 @@ function initialize(root: HTMLElement) {
   function invalidateResult() {
     if (resultUrl) URL.revokeObjectURL(resultUrl);
     resultUrl = undefined;
+    resultFile = undefined;
+    resultShareable = false;
     download.removeAttribute('href');
+    openResult.removeAttribute('href');
+    saveError.textContent='';
+    saveError.hidden=true;
     result.hidden = true;
     get('work-actions').hidden = false;
     updateDownloadShortcut();
@@ -114,8 +128,11 @@ function initialize(root: HTMLElement) {
   function showResult(blob: Blob, name: string) {
     invalidateResult();
     resultUrl = URL.createObjectURL(blob);
+    resultFile = createShareFile(blob,name);
+    resultShareable = canShareFile(resultFile);
     download.href = resultUrl;
     download.download = name;
+    openResult.href = resultUrl;
     get('result-name').textContent = `${name} · ${sizeLabel(blob.size)}`;
     result.hidden = false;
     get('work-actions').hidden = true;
@@ -367,6 +384,24 @@ function initialize(root: HTMLElement) {
   saveLocal.addEventListener('click',()=>{
     if(!busy&&resultUrl&&download.hasAttribute('href'))download.click();
   });
+  shareResult.addEventListener('click',async()=>{
+    if(busy||shareInFlight||!resultFile||!resultUrl)return;
+    const file=resultFile;
+    shareInFlight=true;
+    saveError.hidden=true;
+    saveError.textContent='';
+    updateDownloadShortcut();
+    try {
+      const outcome=await shareResultFile(file);
+      if(file===resultFile&&(outcome==='failed'||outcome==='unavailable')){
+        saveError.textContent=d.saveFailedHelp;
+        saveError.hidden=false;
+      }
+    } finally {
+      shareInFlight=false;
+      updateDownloadShortcut();
+    }
+  });
   root.addEventListener('dragover',event=>{
     if(!event.dataTransfer?.types.includes('Files'))return;
     event.preventDefault();if(!busy)dropZone.classList.add('drag-over');
@@ -406,8 +441,10 @@ function initialize(root: HTMLElement) {
     });
   }
   root.querySelectorAll('select,input[type=text]').forEach(control=>control.addEventListener('change',()=>{if(!busy)invalidateResult();}));
-  window.addEventListener('pagehide',cleanup);
-  window.addEventListener('pageshow',event=>{if(event.persisted)reset();});
+  // Safari may cache this page while a PDF preview is open. Retain its local
+  // result for Back; actual disposal/reset/replacement still releases resources.
+  window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup();});
+  window.addEventListener('pageshow',event=>{if(event.persisted)updateControls();});
   if(!('Worker' in window)||!('createObjectURL' in URL))showError('unsupportedBrowser');
   updateControls();
 }

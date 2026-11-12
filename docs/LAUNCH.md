@@ -30,6 +30,7 @@ Automated tests cover specific inputs; they do not establish that every PDF or e
 - New jobs and removed files release previews; old results do not replace a newer in-progress job.
 - Every locale renders complete controls, errors, instructions, and policy content.
 - Narrow screens have usable controls, no clipped downloads, and no required hover-only actions.
+- On a real iPhone/iPad, convert a sample and verify **Download result**, **Share / Save to Files** when offered, and **Open result**. Confirm the saved PDF opens from Files, cancelling sharing preserves the result, and returning from a preview does not clear it. Test both PDF and ZIP outputs; native sharing can support different file types on different browsers. Automated event tests do not replace these device checks.
 - Browser developer tools show no PDF, image, DOCX, HWP, HWPX or PPTX file contents being uploaded and no external document resources being fetched.
 
 ## 2. Maintain the independent repository

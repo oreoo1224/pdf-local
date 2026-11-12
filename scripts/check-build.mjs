@@ -120,6 +120,16 @@ for (const locale of locales) {
     const prefix = locale === 'en' ? '' : locale;
     const path = join('dist', prefix, route, 'index.html');
     const html = await checkPage(path, locale);
+    if (!route || tools.includes(route)) {
+      for (const id of ['download', 'open-result']) {
+        const matches = tags(html, 'a').filter(tag => attribute(tag, 'id') === id);
+        assert.equal(matches.length, 1, `${path}: one ${id} action`);
+        assert.equal(attribute(matches[0], 'target'), '_blank', `${path}: ${id} preserves the editor`);
+        assert.ok((attribute(matches[0], 'rel') || '').split(/\s+/).includes('noopener'), `${path}: safe ${id} preview`);
+      }
+      assert.ok(tags(html, 'button').some(tag => attribute(tag, 'id') === 'share-result'), `${path}: native file sharing action`);
+      assert.ok(html.includes('id="save-error"') && html.includes('id="result-save-help"'), `${path}: saving feedback`);
+    }
     const indexable = isIndexableRoute(route, env.CONTACT_EMAIL);
     const links = tags(html, 'link');
     const canonicals = links.filter(tag => attribute(tag, 'rel') === 'canonical');
