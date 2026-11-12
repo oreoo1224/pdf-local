@@ -53,6 +53,23 @@ async function checkPage(path, locale) {
   assert.ok(!titles.has(title), `${path}: distinct title`);
   titles.add(title);
   assert.ok(content(html, 'description'), `${path}: description`);
+  const iconLinks = tags(html, 'link');
+  for (const [rel, size, filename] of [
+    ['icon', '16x16 32x32 48x48', 'favicon.ico'],
+    ['icon', '32x32', 'favicon-32.png'],
+    ['icon', '96x96', 'favicon-96.png'],
+    ['apple-touch-icon', '180x180', 'apple-touch-icon.png'],
+  ]) {
+    const matching = iconLinks.filter(tag => attribute(tag, 'rel') === rel && attribute(tag, 'sizes') === size);
+    assert.equal(matching.length, 1, `${path}: one ${rel} ${size}`);
+    assert.equal(attribute(matching[0], 'href'), `${base}${filename}`, `${path}: icon deployment base`);
+  }
+  const brand = tags(html, 'img').find(tag => (attribute(tag, 'class') || '').split(/\s+/).includes('brand-logo'));
+  assert.ok(brand, `${path}: approved header artwork`);
+  assert.equal(attribute(brand, 'src'), `${base}favicon-96.png`, `${path}: header artwork path`);
+  assert.equal(attribute(brand, 'width'), '34', `${path}: reserved logo width`);
+  assert.equal(attribute(brand, 'height'), '34', `${path}: reserved logo height`);
+  assert.equal(attribute(brand, 'alt'), '', `${path}: adjacent brand text names the link`);
   const accountTags = metas(html).filter(tag => attribute(tag, 'name') === 'google-adsense-account');
   assert.equal(accountTags.length, 1, `${path}: one AdSense account declaration`);
   assert.equal(attribute(accountTags[0], 'content'), adsenseAccount, `${path}: account matches ads.txt publisher`);
@@ -89,6 +106,7 @@ function checkStructuredData(html, path, expected, route, indexable) {
   assert.equal(pages.length, 1, `${path}: one WebPage node`);
   const website = websites[0], page = pages[0];
   assert.equal(website.url, new URL(base, origin).href, `${path}: WebSite URL`);
+  assert.equal(website.image, new URL(`${base}logo.png`, origin).href, `${path}: approved structured-data logo`);
   assert.equal(page.url, expected, `${path}: WebPage canonical URL`);
   assert.ok(website['@id'] && page['@id'], `${path}: linked graph identifiers`);
   assert.equal(idOf(page.isPartOf), website['@id'], `${path}: WebPage belongs to WebSite`);
@@ -203,7 +221,8 @@ for (const directory of ['cmaps', 'standard_fonts', 'wasm', 'iccs']) {
   assert.ok((await readdir(`dist/pdfjs/${directory}`)).length > 0, `PDF.js ${directory}`);
 }
 for (const file of [
-  'robots.txt', 'sitemap.xml', '_headers', 'social-card.png', 'logo.svg',
+  'robots.txt', 'sitemap.xml', '_headers', 'social-card.png', 'logo.png',
+  'favicon.ico', 'favicon-32.png', 'favicon-96.png', 'apple-touch-icon.png',
   'licenses/pdf-lib.txt', 'licenses/pdfjs-dist.txt', 'licenses/fflate.txt',
   'office/docx_parser_bg.wasm', 'office/pptx_parser_bg.wasm',
   'hangul/rhwp_bg.wasm', 'licenses/rhwp-core.txt',
@@ -217,7 +236,27 @@ assert.equal(shareImage.toString('ascii', 12, 16), 'IHDR', 'PNG image header');
 assert.equal(shareImage.readUInt32BE(16), 1200, 'Actual share image width');
 assert.equal(shareImage.readUInt32BE(20), 630, 'Actual share image height');
 assert.ok(shareImage.length < 150_000, 'Share image stays compact');
-assert.match(await readFile('dist/logo.svg', 'utf8'), /<svg\b[^>]*viewBox="0 0 \d+ \d+"/, 'Scalable brand logo');
+for (const [filename, size] of [['favicon-32.png', 32], ['favicon-96.png', 96], ['apple-touch-icon.png', 180], ['logo.png', 512]]) {
+  const bytes = await readFile(`dist/${filename}`);
+  assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), `${filename}: PNG signature`);
+  assert.equal(bytes.readUInt32BE(16), size, `${filename}: actual width`);
+  assert.equal(bytes.readUInt32BE(20), size, `${filename}: actual height`);
+}
+const favicon = await readFile('dist/favicon.ico');
+assert.equal(favicon.readUInt16LE(0), 0, 'ICO reserved field');
+assert.equal(favicon.readUInt16LE(2), 1, 'ICO image type');
+assert.equal(favicon.readUInt16LE(4), 3, 'Three ICO frames');
+for (const [index, size] of [16, 32, 48].entries()) {
+  const entry = 6 + index * 16;
+  const offset = favicon.readUInt32LE(entry + 12);
+  const length = favicon.readUInt32LE(entry + 8);
+  assert.equal(favicon[entry], size, 'ICO frame width');
+  assert.equal(favicon[entry + 1], size, 'ICO frame height');
+  assert.ok(offset >= 54 && offset + length <= favicon.length, 'ICO frame bounds');
+  assert.deepEqual(favicon.subarray(offset, offset + 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), 'ICO frame PNG signature');
+  assert.equal(favicon.readUInt32BE(offset + 16), size, 'ICO frame actual width');
+  assert.equal(favicon.readUInt32BE(offset + 20), size, 'ICO frame actual height');
+}
 assert.match(await readFile('dist/licenses/rhwp-core.txt', 'utf8'), /MIT License/, 'Hangul runtime MIT notice');
 const noticeFiles = await readdir('node_modules/@rhwp/core/notices', { recursive: true, withFileTypes: true });
 for (const notice of noticeFiles.filter(entry => entry.isFile())) {

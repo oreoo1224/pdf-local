@@ -28,7 +28,7 @@ export function createPageSeo({site,base='/',locale,route='',title,description,c
     const websiteId=`${websiteUrl}#website`;
     graph.push({
       '@type':'WebSite','@id':websiteId,name:'PDFEditGo',url:websiteUrl,
-      inLanguage:[...locales],image:absoluteSiteUrl('/logo.svg',site,base),
+      inLanguage:[...locales],image:absoluteSiteUrl('/logo.png',site,base),
     });
     const page:SchemaNode={
       '@type':'WebPage','@id':`${canonical}#webpage`,url:canonical,name:title,

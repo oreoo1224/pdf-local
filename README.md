@@ -16,6 +16,8 @@ File validation is labeled separately from conversion. Processing remains below 
 
 See the [generated design reference](docs/design-reference.png). It illustrates the intended layout; it is not a browser screenshot.
 
+The approved icon artwork is preserved in `docs/brand-original.jpg`. Browser favicons, the 180px Apple touch icon, the header mark and structured-data logo use exports of that same artwork. Regenerate the checked-in PNG/ICO files with `node scripts/prepare-icons.mjs`; the exporter changes dimensions only, without redrawing or cropping the design.
+
 | Tool | Processing |
 | --- | --- |
 | Word / Hangul to PDF | Detect a `.docx`, supported HWP 5.0 `.hwp`, or `.hwpx` file and use the matching local document engine to create an image-based PDF. |

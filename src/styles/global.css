@@ -70,8 +70,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible {
   letter-spacing:-1px;
   white-space:nowrap
 }
-.brand svg {
-  color:var(--blue)
+.brand-logo {
+  display:block;
+  flex:none
 }
 .header-right {
   display:flex;

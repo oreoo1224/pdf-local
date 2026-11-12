@@ -1,6 +1,5 @@
 ---
 import '../styles/global.css';
-import Icon from '../components/Icon.astro';
 import LanguageMenu from '../components/LanguageMenu.astro';
 import { getText, localePath, type Locale, type Tool } from '../lib/i18n';
 import { sitePath } from '../lib/site-path';
@@ -23,7 +22,10 @@ const verification=import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
     <meta name="google-adsense-account" content="ca-pub-7780621394135550" />
     {verification && <meta name="google-site-verification" content={verification} />}
     <meta name="theme-color" content="#1558e8" />
-    <link rel="icon" type="image/svg+xml" href={sitePath('/favicon.svg')} />
+    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href={sitePath('/favicon.ico')} />
+    <link rel="icon" type="image/png" sizes="32x32" href={sitePath('/favicon-32.png')} />
+    <link rel="icon" type="image/png" sizes="96x96" href={sitePath('/favicon-96.png')} />
+    <link rel="apple-touch-icon" sizes="180x180" href={sitePath('/apple-touch-icon.png')} />
     {seo.canonical && <link rel="canonical" href={seo.canonical} />}
     {seo.alternates.map(({locale:lang,href}) => <link rel="alternate" hreflang={lang} href={href} />)}
     <meta property="og:type" content="website" />
@@ -49,7 +51,7 @@ const verification=import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
   <body>
     <a class="skip" href="#main">{d.skipToContent}</a>
     <header class="site-header">
-      <a class="brand" href={homeHref}><Icon name="logo" size={34} />PDFEditGo</a>
+      <a class="brand" href={homeHref}><img class="brand-logo" src={sitePath('/favicon-96.png')} width="34" height="34" alt="" decoding="async" />PDFEditGo</a>
       <nav class="header-right" aria-label={d.navTools}>
         <a href={`${homeHref}#tools`}>{d.navTools}</a>
         <LanguageMenu locale={locale} route={route==='404'?'':route} />

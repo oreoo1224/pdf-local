@@ -5,7 +5,7 @@ describe('hosting base paths', () => {
   it('keeps root-hosted URLs unchanged', () => {
     expect(normalizeSiteBase()).toBe('/');
     expect(withSiteBase('/ko/merge-pdf/')).toBe('/ko/merge-pdf/');
-    expect(withSiteBase('/favicon.svg', '/')).toBe('/favicon.svg');
+    expect(withSiteBase('/favicon.ico', '/')).toBe('/favicon.ico');
     expect(sitePath('/')).toBe('/');
   });
 
@@ -15,7 +15,7 @@ describe('hosting base paths', () => {
     expect(normalizeSiteBase('/pdf-local/')).toBe('/pdf-local/');
     expect(withSiteBase('/', '/pdf-local/')).toBe('/pdf-local/');
     expect(withSiteBase('/ko/merge-pdf/', '/pdf-local/')).toBe('/pdf-local/ko/merge-pdf/');
-    expect(withSiteBase('/favicon.svg', '/pdf-local/')).toBe('/pdf-local/favicon.svg');
+    expect(withSiteBase('/favicon.ico', '/pdf-local/')).toBe('/pdf-local/favicon.ico');
   });
 
   it('prefixes once at a complete path boundary and preserves URL suffixes', () => {
