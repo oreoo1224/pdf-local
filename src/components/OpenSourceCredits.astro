@@ -1,0 +1,74 @@
+---
+import { creditsText, openSourceCredits } from '../lib/credits';
+import type { Locale } from '../lib/i18n';
+import { sitePath } from '../lib/site-path';
+
+interface Props { locale: Locale; }
+const { locale } = Astro.props;
+const text = creditsText[locale];
+---
+
+<section class="open-source-credits" aria-labelledby="open-source-credits-heading">
+  <h2 id="open-source-credits-heading">{text.heading}</h2>
+  <p>{text.introduction}</p>
+  <p>{text.processing}</p>
+  <ul class="credit-list" role="list">
+    {openSourceCredits.map(credit => <li class="credit">
+      <h3><a href={credit.upstream}>{credit.name}</a>{credit.version && <span class="credit-version"> {credit.version}</span>}</h3>
+      <p>{credit.purpose[locale]}</p>
+      <p class="credit-license">{credit.license}</p>
+      <ul class="credit-links" role="list">
+        <li><a href={sitePath(credit.licensePath)}>{text.licenseText}</a></li>
+        {credit.noticesPath && <li><a href={sitePath(credit.noticesPath)}>{text.thirdPartyNotices}</a></li>}
+      </ul>
+    </li>)}
+  </ul>
+  <p class="credits-build">{text.buildTechnology}: <a href="https://github.com/withastro/astro">Astro 7.4.10</a> (MIT) · <a href="https://github.com/microsoft/TypeScript">TypeScript 6.0.3</a> (Apache-2.0).</p>
+  <p class="credits-scope">{text.scope}</p>
+</section>
+
+<style>
+  .open-source-credits {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border, #dce3ed);
+    min-width: 0;
+  }
+  .open-source-credits h2 { line-height: 1.35; }
+  .credit-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 1.5rem 0;
+    list-style: none;
+  }
+  .credit {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--border, #dce3ed);
+    border-radius: 0.5rem;
+    overflow-wrap: anywhere;
+  }
+  .credit h3 { margin: 0; font-size: 1rem; line-height: 1.6; }
+  .credit-version { font-size: 0.875rem; font-weight: 400; color: #4d5c73; white-space: nowrap; }
+  .credit p { margin: 0.65rem 0; }
+  .credit .credit-license { font-size: 0.875rem; }
+  .credit-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  .credit-links li { min-width: 0; }
+  .credit-links a { display: inline-block; padding: 0.5rem 0; }
+  .open-source-credits a { text-underline-offset: 0.2em; }
+  .open-source-credits a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+  .credits-scope { font-size: 0.875rem; }
+  @media (max-width: 600px) {
+    .credit-list { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

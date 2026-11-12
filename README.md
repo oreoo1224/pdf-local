@@ -109,7 +109,7 @@ Copy `.env.example` to `.env` for local configuration, or set the relevant hosti
 | `SITE_URL` | `https://pdfeditgo.com` for the connected production domain. Used for canonical URLs, language alternates, Open Graph URLs, sitemap, and robots references. |
 | `SITE_BASE` | `/` for the connected custom domain. The GitHub Pages workflow obtains this from the repository's Pages configuration. Keep `SITE_URL` as the origin without this path. |
 | `CF_PAGES_URL` | Cloudflare's deployment URL; the build can use it as a fallback when `SITE_URL` is absent. Prefer a stable `SITE_URL` for the production site. |
-| `CONTACT_EMAIL` | A real public operator support address. Configure it before public launch; never enter a private credential. |
+| `CONTACT_EMAIL` | Current public support address: `kgeon1451@gmail.com`. The Pages workflow reads the repository variable when set, otherwise uses this public address as its default. Never enter a private credential; forks must replace the workflow default and configure their own address. |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | Optional real Google HTML-tag verification token for a Search Console URL-prefix property. Leave empty unless Google supplies it. |
 
 Do not publish canonical links pointing to `your-project.pages.dev`, localhost, an unregistered domain, or a preview deployment when a production hostname exists. After a domain change, update `SITE_URL`, rebuild, and check generated metadata and `sitemap.xml`.
@@ -121,6 +121,8 @@ A production origin and operator email are not required to create the initial pr
 The production sitemap is [https://pdfeditgo.com/sitemap.xml](https://pdfeditgo.com/sitemap.xml), with its discovery URL in [robots.txt](https://pdfeditgo.com/robots.txt). Each indexable page has localized metadata, a canonical URL and reciprocal English, Korean, Spanish, Japanese and `x-default` alternates. Social sharing uses the included 1200 × 630 PNG, and structured data describes the visible website, page, breadcrumbs and actual tool where applicable.
 
 The sitemap contains 40 URLs without an operator email, or 44 once `CONTACT_EMAIL` is configured. Unconfigured Contact pages and the 404 page use `noindex`; 404 pages never point their canonical URL at the homepage. Search Console verification and sitemap submission are separate owner actions. Follow [the SEO and Search Console guide](docs/SEO.md) to register the domain and submit the sitemap.
+
+The production workflow defaults to `CONTACT_EMAIL=kgeon1451@gmail.com`, so Contact is available in all four languages and the production sitemap contains 44 URLs. About includes localized open-source project credits, upstream repositories, and bundled license notices. Terms describe conversion accuracy and legal-effect limitations while preserving rights and liabilities that cannot lawfully be excluded. Homepage and tool browser titles use each page's language; English remains the default at `/`.
 
 ## Independent repository
 

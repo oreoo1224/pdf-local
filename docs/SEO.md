@@ -22,7 +22,7 @@ Use these values for the current domain:
 | --- | --- |
 | `SITE_URL` | `https://pdfeditgo.com` |
 | `SITE_BASE` | `/` |
-| `CONTACT_EMAIL` | A real public operator address, if available |
+| `CONTACT_EMAIL` | `kgeon1451@gmail.com` for the current operator; configured production sitemap has 44 URLs |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | Optional real Google-issued token; leave empty unless using that method |
 
 Keep the legacy `/pdf-local/` path out of production canonical, alternate, social and sitemap URLs. Configure variables in the hosting build environment and rebuild; editing a local `.env` file alone does not update the public site. See [the launch guide](LAUNCH.md) for the current hosting workflow.

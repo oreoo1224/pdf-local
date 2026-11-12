@@ -51,7 +51,7 @@ The workflow derives `SITE_URL` and `SITE_BASE` from the actual Pages configurat
 
 `https://oreoo1224.github.io/pdf-local/` is the legacy fallback only. If the custom domain is intentionally removed, verify Pages again and rebuild with the returned project origin/base. Do not leave legacy paths in production metadata or asset URLs.
 
-Set the repository's **Settings → Secrets and variables → Actions → Variables → CONTACT_EMAIL** to a real public operator address before launch. No API key or personal GitHub token is needed by the workflow. GitHub Pages does not apply the Cloudflare `_headers` file; inspect the actual response headers and do not advertise that custom CSP as enforced there.
+The Pages workflow defaults to the current public operator address `kgeon1451@gmail.com`. A value set in this repository's **Settings → Secrets and variables → Actions → Variables → CONTACT_EMAIL** overrides that default. Verify the deployed Contact pages; new operators and forks must replace the workflow default and configure their own address. No API key or personal GitHub token is needed by the workflow. GitHub Pages does not apply the Cloudflare `_headers` file; inspect the actual response headers and do not advertise that custom CSP as enforced there.
 
 ### Cloudflare Pages
 

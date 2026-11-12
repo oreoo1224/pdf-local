@@ -9,10 +9,11 @@ const loader = await createServer({
   optimizeDeps: { noDiscovery: true, include: [] },
   server: { middlewareMode: true, hmr: false, ws: false, watch: null },
 });
-let locales, tools, routes, isIndexableRoute;
+let locales, tools, routes, isIndexableRoute, openSourceCredits, creditsText;
 try {
   ({ locales, tools } = await loader.ssrLoadModule('/src/lib/i18n.ts'));
   ({ seoRoutes: routes, isIndexableRoute } = await loader.ssrLoadModule('/src/lib/seo-routes.ts'));
+  ({ openSourceCredits, creditsText } = await loader.ssrLoadModule('/src/lib/credits.ts'));
 } finally {
   await loader.close();
 }
@@ -147,6 +148,17 @@ for (const locale of locales) {
     const prefix = locale === 'en' ? '' : locale;
     const path = join('dist', prefix, route, 'index.html');
     const html = await checkPage(path, locale);
+    if (route === 'about') {
+      assert.ok(html.includes(creditsText[locale].heading), `${path}: localized open-source credits`);
+      for (const credit of openSourceCredits) {
+        assert.ok(html.includes(`href="${credit.upstream}"`), `${path}: ${credit.name} source`);
+        assert.ok(html.includes(`href="${base}${credit.licensePath.slice(1)}"`), `${path}: ${credit.name} license`);
+        if (credit.noticesPath) assert.ok(html.includes(`href="${base}${credit.noticesPath.slice(1)}"`), `${path}: bundled notices`);
+      }
+    }
+    if (route === 'contact' && env.CONTACT_EMAIL?.trim()) {
+      assert.ok(html.includes(`href="mailto:${env.CONTACT_EMAIL.trim()}"`), `${path}: configured public contact`);
+    }
     if (!route || tools.includes(route)) {
       for (const id of ['download', 'open-result']) {
         const matches = tags(html, 'a').filter(tag => attribute(tag, 'id') === id);

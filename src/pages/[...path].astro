@@ -3,6 +3,7 @@ import Site from '../layouts/Site.astro';
 import ToolCards from '../components/ToolCards.astro';
 import Workspace from '../components/Workspace.astro';
 import AdSlot from '../components/AdSlot.astro';
+import OpenSourceCredits from '../components/OpenSourceCredits.astro';
 import { locales, tools, getText, localePath, toolContent, homeContent, legalContent, type Locale, type Tool } from '../lib/i18n';
 import { sitePath } from '../lib/site-path';
 export function getStaticPaths() {
@@ -49,6 +50,7 @@ const description=info?.description || content!.description;
   </> : info ? <article class="legal">
     <h1>{info.title}</h1>
     {info.paragraphs.map(paragraph=><p>{paragraph}</p>)}
+    {legal==='about' && <OpenSourceCredits locale={locale}/>}
     {legal==='contact' && contactEmail && <p><a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>}
   </article>:null}
 </Site>
