@@ -18,6 +18,11 @@ try {
 }
 
 const pageCount = locales.length * routes.length;
+const adsTxt = await readFile('dist/ads.txt', 'utf8');
+assert.equal(adsTxt, await readFile('public/ads.txt', 'utf8'), 'Published ads.txt matches source');
+const publisher = adsTxt.trim().match(/^google\.com, (pub-\d{16}), DIRECT, f08c47fec0942fa0$/);
+assert.ok(publisher, 'Valid direct Google publisher record');
+const adsenseAccount = `ca-${publisher[1]}`;
 const titles = new Set();
 const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), ['SITE_URL', 'CF_PAGES_URL', 'SITE_BASE', 'CONTACT_EMAIL']);
 const origin = env.SITE_URL || env.CF_PAGES_URL;
@@ -48,6 +53,10 @@ async function checkPage(path, locale) {
   assert.ok(!titles.has(title), `${path}: distinct title`);
   titles.add(title);
   assert.ok(content(html, 'description'), `${path}: description`);
+  const accountTags = metas(html).filter(tag => attribute(tag, 'name') === 'google-adsense-account');
+  assert.equal(accountTags.length, 1, `${path}: one AdSense account declaration`);
+  assert.equal(attribute(accountTags[0], 'content'), adsenseAccount, `${path}: account matches ads.txt publisher`);
+  assert.doesNotMatch(html, /<script\b[^>]*\bsrc="[^"]*(?:adsbygoogle|pagead2\.googlesyndication\.com)/i, `${path}: no ad script introduced`);
   assert.ok(!html.includes('undefined'), `${path}: no leaked missing values`);
   for (const [, href] of html.matchAll(/(?:href|src)="(\/[^\"#?]*)(?:[?#][^\"]*)?"/g)) {
     assert.ok(href.startsWith(base), `${path}: internal URL uses configured base ${href}`);

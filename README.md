@@ -167,12 +167,14 @@ On Cloudflare Pages with the supplied root-path configuration, only fingerprinte
 
 ## Ads and future monetization
 
-No AdSense script, publisher ID, tracking pixel, analytics SDK, or advertising cookie is present. Advertisement space should be managed through a reusable component, clearly labeled, separated from file/download controls, and assigned dimensions when enabled to limit layout shifts. Keep unused placements hidden.
+The operator-provided AdSense account `ca-pub-7780621394135550` is declared in the shared document head, and [ads.txt](https://pdfeditgo.com/ads.txt) identifies `pub-7780621394135550` as the direct Google publisher. These static declarations do not load ads or establish account/site approval. To change the publisher later, update both `src/layouts/Site.astro` and `public/ads.txt` together, rebuild and deploy.
+
+No AdSense script, tracking pixel, analytics SDK, or advertising cookie is present. Advertisement space should be managed through a reusable component, clearly labeled, separated from file/download controls, and assigned dimensions when enabled to limit layout shifts. Keep unused placements hidden.
 
 Before enabling ads:
 
 1. Apply with the actual operator account and domain; approval and revenue are not guaranteed.
-2. Add only the real approved publisher ID. Do not invent an ID or ship another operator's ID.
+2. Verify that the configured publisher ID belongs to the operator and matches the actual AdSense account. Use only that account's approved advertising code.
 3. Review the applicable consent and disclosure requirements, including Google's current consent requirements for visitors in the EEA, UK, and Switzerland, and any other regions you target. Configure a suitable certified CMP where required before making dependent ad or cookie requests.
 4. Update the privacy policy with actual providers, purposes, retention, choices, and a functioning operator contact. Terms and privacy text are implementation descriptions, not a substitute for an operator review.
 5. Update the CSP narrowly, reserve responsive ad dimensions, and test that ads cannot be mistaken for processing or download buttons.

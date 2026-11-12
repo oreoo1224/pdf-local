@@ -51,4 +51,4 @@ Bing registration and submission have **not** been performed. The owner may add 
 
 Valid metadata and a sitemap help search engines discover and understand pages. They do not guarantee crawling, indexing, a particular ranking, a chosen search snippet, or traffic. Search engines can rewrite titles and descriptions. Keep the explanations accurate and useful, and monitor the deployed site and search reports over time.
 
-Search setup also does not obtain Google AdSense approval. No AdSense application, publisher configuration or advertising approval was completed here. Advertising requires a separate operator-led setup and policies that match the actual services enabled on the site.
+Search setup also does not obtain Google AdSense approval. The operator-provided `google-adsense-account` meta tag and `ads.txt` are configured in the source, without an advertising script. No AdSense account actions, application submission or advertising approval were performed here. Enabling advertising requires a separate operator-led setup and policies that match the actual services enabled on the site.

@@ -103,7 +103,9 @@ Use browser developer tools to inspect CSP violations and test PDF.js workers, f
 
 Only after the domain is stable, register the actual site with Google Search Console and submit its generated sitemap. Indexing and search rankings are not guaranteed. Keep tool explanations useful and accurate; do not generate large numbers of repetitive pages simply to target keywords.
 
-Before enabling ads or analytics, review the README's consent section, update policy pages to match the actual providers, and configure the necessary user choices. Reserve dimensions for visible ad slots, label them clearly, and keep them away from download controls. No publisher ID, CMP, or advertising service is configured by this repository.
+The operator-provided AdSense account meta tag and `ads.txt` are configured. After deployment, verify the meta tag in the HTML head and the exact publisher record at `https://pdfeditgo.com/ads.txt`, then complete the offered ownership check in the operator's AdSense account. These declarations do not establish approval or activate advertising.
+
+Before enabling ads or analytics, review the README's consent section, update policy pages to match the actual providers, and configure the necessary user choices. Reserve dimensions for visible ad slots, label them clearly, and keep them away from download controls. No advertising script, CMP, or advertising service is enabled by this repository.
 
 ## 6. Ongoing maintenance
 
