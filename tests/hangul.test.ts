@@ -234,9 +234,26 @@ describe('Hangul output limits and cleanup', () => {
     destroy: vi.fn(),
   });
 
-  it('closes the source when a page range is invalid', async () => {
+  it.each(['throw', 'reject'] as const)('keeps a completed PDF when source cleanup fails by %s', async cleanupFailure => {
     const source = renderDocument(1);
-    await expect(hangulToPdfWithRenderer(await fixture('hwp'), 'hwp', { scale: 1, range: '2' }, async () => source)).rejects.toHaveProperty('code');
+    source.renderPage = vi.fn(async () => createCanvas(2, 2).toBuffer('image/png'));
+    source.destroy = vi.fn(() => {
+      if (cleanupFailure === 'reject') return Promise.reject(new Error('synthetic cleanup failure'));
+      throw new Error('synthetic cleanup failure');
+    });
+
+    const result = await hangulToPdfWithRenderer(await fixture('hwp'), 'hwp', { scale: 1, range: '' }, async () => source);
+
+    expect(result.name).toBe('simple.pdf');
+    expect(result.blob.type).toBe('application/pdf');
+    expect((await PDFDocument.load(await result.blob.arrayBuffer())).getPageCount()).toBe(1);
+    expect(source.destroy).toHaveBeenCalledOnce();
+  });
+
+  it('preserves an invalid page range error when source cleanup also fails', async () => {
+    const source = renderDocument(1);
+    source.destroy = vi.fn(() => { throw new Error('synthetic cleanup failure'); });
+    await expect(hangulToPdfWithRenderer(await fixture('hwp'), 'hwp', { scale: 1, range: '2' }, async () => source)).rejects.toMatchObject({ code: 'invalidRange' });
     expect(source.destroy).toHaveBeenCalledOnce();
     expect(source.renderPage).not.toHaveBeenCalled();
   });
@@ -254,10 +271,13 @@ describe('Hangul output limits and cleanup', () => {
     expect(source.renderPage).not.toHaveBeenCalled();
   });
 
-  it('releases the source after a render failure', async () => {
+  it('preserves the translated render error when source cleanup also rejects', async () => {
     const source = renderDocument(1);
+    const progress: number[] = [];
     source.renderPage = vi.fn(async () => { throw new Error('synthetic rendering failure'); });
-    await expect(hangulToPdfWithRenderer(await fixture('hwp'), 'hwp', { scale: 1, range: '' }, async () => source)).rejects.toMatchObject({ code: 'officeRender' });
+    source.destroy = vi.fn(async () => { throw new Error('synthetic cleanup failure'); });
+    await expect(hangulToPdfWithRenderer(await fixture('hwp'), 'hwp', { scale: 1, range: '' }, async () => source, value => progress.push(value))).rejects.toMatchObject({ code: 'officeRender' });
+    expect(progress).not.toContain(100);
     expect(source.destroy).toHaveBeenCalledOnce();
   });
 });

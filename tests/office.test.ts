@@ -190,9 +190,26 @@ describe('Office PDF output bounds and cleanup', () => {
     destroy: vi.fn(),
   });
 
-  it('closes the document when a requested page does not exist', async () => {
+  it.each(['throw', 'reject'] as const)('keeps a completed PDF when source cleanup fails by %s', async cleanupFailure => {
+    const document = renderer(1);
+    document.renderPage = vi.fn(async () => createCanvas(2, 2).toBuffer('image/png'));
+    document.destroy = vi.fn(() => {
+      if (cleanupFailure === 'reject') return Promise.reject(new Error('synthetic cleanup failure'));
+      throw new Error('synthetic cleanup failure');
+    });
+
+    const result = await officeToPdfWithRenderer(await fixture('docx'), 'docx', { scale: 1, range: '' }, async () => document);
+
+    expect(result.name).toBe('simple.pdf');
+    expect(result.blob.type).toBe('application/pdf');
+    expect((await PDFDocument.load(await result.blob.arrayBuffer())).getPageCount()).toBe(1);
+    expect(document.destroy).toHaveBeenCalledOnce();
+  });
+
+  it('preserves an invalid page range error when source cleanup also fails', async () => {
     const document = renderer(2);
-    await expect(officeToPdfWithRenderer(await fixture('docx'), 'docx', { scale: 1, range: '3' }, async () => document)).rejects.toHaveProperty('code');
+    document.destroy = vi.fn(() => { throw new Error('synthetic cleanup failure'); });
+    await expect(officeToPdfWithRenderer(await fixture('docx'), 'docx', { scale: 1, range: '3' }, async () => document)).rejects.toMatchObject({ code: 'invalidRange' });
     expect(document.destroy).toHaveBeenCalledOnce();
     expect(document.renderPage).not.toHaveBeenCalled();
   });
@@ -207,6 +224,16 @@ describe('Office PDF output bounds and cleanup', () => {
   it('rejects an oversized output selection and closes the source', async () => {
     const document = renderer(51);
     await expect(officeToPdfWithRenderer(await fixture('docx'), 'docx', { scale: 1, range: '' }, async () => document)).rejects.toMatchObject({ code: 'officeLimit' });
+    expect(document.destroy).toHaveBeenCalledOnce();
+  });
+
+  it('preserves the translated render error when source cleanup also rejects', async () => {
+    const document = renderer(1);
+    const progress: number[] = [];
+    document.renderPage = vi.fn(async () => { throw new Error('synthetic rendering failure'); });
+    document.destroy = vi.fn(async () => { throw new Error('synthetic cleanup failure'); });
+    await expect(officeToPdfWithRenderer(await fixture('docx'), 'docx', { scale: 1, range: '' }, async () => document, value => progress.push(value))).rejects.toMatchObject({ code: 'officeRender' });
+    expect(progress).not.toContain(100);
     expect(document.destroy).toHaveBeenCalledOnce();
   });
 });

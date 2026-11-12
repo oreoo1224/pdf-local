@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getText } from '../src/lib/i18n';
 
 const engines = vi.hoisted(() => ({
   validateWordFile: vi.fn(async () => 'hwp'),
@@ -38,7 +39,8 @@ class Element extends EventTarget {
   removeAttribute(name: string) { this.attributes.delete(name); }
   append(...children: Element[]) { this.children.push(...children); }
   replaceChildren(...children: Element[]) { this.children = children; }
-  focus() {}
+  focus = vi.fn();
+  scrollIntoView = vi.fn();
 }
 
 function workspaceFixture() {
@@ -83,13 +85,13 @@ function workspaceFixture() {
   const lifecycle = (type: 'pagehide' | 'pageshow', persisted: boolean) => {
     window.dispatchEvent(Object.assign(new Event(type), { persisted }));
   };
-  return { get, root, document, window, lifecycle };
+  return { get, root, document, window, lifecycle, markup };
 }
 
-function deferred() {
-  let resolve!: () => void;
+function deferred<T = void>() {
+  let resolve!: (value: T) => void;
   let reject!: (error: unknown) => void;
-  const promise = new Promise<void>((fulfill, fail) => { resolve = fulfill; reject = fail; });
+  const promise = new Promise<T>((fulfill, fail) => { resolve = fulfill; reject = fail; });
   return { promise, resolve, reject };
 }
 
@@ -129,13 +131,17 @@ describe('completed local results and mobile saving', () => {
     vi.unstubAllGlobals();
   });
 
-  async function convert() {
+  async function chooseFile() {
     fixture.get('file-input').files = [input];
     fixture.get('file-input').dispatchEvent(new Event('change'));
     await vi.waitFor(() => {
       expect(fixture.get('work-area').hidden).toBe(false);
       expect(fixture.get('run-tool').disabled).toBe(false);
     });
+  }
+
+  async function convert() {
+    await chooseFile();
     fixture.get('run-tool').click();
     await vi.waitFor(() => expect(fixture.get('save-local').disabled).toBe(false));
     expect(engines.wordToPdf).toHaveBeenCalledWith(input, expect.any(Object), expect.any(Function));
@@ -150,6 +156,114 @@ describe('completed local results and mobile saving', () => {
     expect(fixture.get('download').href).toBe(url);
     expect(fixture.get('open-result').href).toBe(url);
   }
+
+  function expectIncomplete() {
+    expect(Number(fixture.get('progress').value)).toBeLessThan(100);
+    expect(Number.parseInt(fixture.get('progress-value').textContent, 10)).toBeLessThan(100);
+    expect(fixture.get('result').hidden).toBe(true);
+    expect(fixture.get('save-local').disabled).toBe(true);
+    expect(fixture.get('download').hasAttribute('href')).toBe(false);
+    expect(fixture.get('open-result').hasAttribute('href')).toBe(false);
+  }
+
+  function expectConversionFailure() {
+    expectIncomplete();
+    expect(fixture.root.getAttribute('aria-busy')).toBe('false');
+    expect(fixture.get('tool-error').hidden).toBe(false);
+    expect(fixture.get('tool-error').textContent).not.toBe('');
+    expect(fixture.get('tool-error').focus).toHaveBeenCalled();
+    expect(fixture.get('tool-error').scrollIntoView).toHaveBeenCalled();
+    expect(fixture.get('save-local-hint').hidden).toBe(false);
+    expect(fixture.get('save-local-hint').textContent).toBe(getText('en').conversionFailed);
+    expect(fixture.get('save-local-hint').textContent).not.toBe(getText('en').downloadPendingHelp);
+    expect(fixture.get('work-area').hidden).toBe(false);
+    expect(fixture.get('work-actions').hidden).toBe(false);
+    expect(fixture.get('run-tool').disabled).toBe(false);
+  }
+
+  it.each([
+    ['office-resolution', '2'],
+    ['page-range', '1'],
+  ])('retains a completed result after a delayed unchanged %s event, then invalidates a real edit', async (id, editedValue) => {
+    const url = await convert();
+    const control = fixture.get(id);
+    const previousValue = control.value;
+    // Native controls can deliver a queued change after conversion has enabled
+    // the form. An event by itself does not mean the converted options changed.
+    await new Promise<void>(resolve => setImmediate(() => {
+      control.dispatchEvent(new Event('change'));
+      resolve();
+    }));
+    expect(control.value).toBe(previousValue);
+    expectReady(url);
+    expect(revoke).not.toHaveBeenCalledWith(url);
+
+    control.value = editedValue;
+    control.dispatchEvent(new Event('change'));
+    expect(fixture.get('result').hidden).toBe(true);
+    expect(fixture.get('work-actions').hidden).toBe(false);
+    expect(fixture.get('save-local').disabled).toBe(true);
+    expect(fixture.get('download').hasAttribute('href')).toBe(false);
+    expect(revoke).toHaveBeenCalledWith(url);
+  });
+
+  it('reserves 100 percent for an available result when the engine reports completion before resolving', async () => {
+    const pending = deferred<{ blob: Blob; name: string; pageCount: number }>();
+    engines.wordToPdf.mockImplementation((_file: File, _options: unknown, progress: (value: number) => void) => {
+      progress(100);
+      return pending.promise;
+    });
+    await chooseFile();
+    fixture.get('run-tool').click();
+    await vi.waitFor(() => expect(engines.wordToPdf).toHaveBeenCalledOnce());
+
+    expectIncomplete();
+    expect(fixture.root.getAttribute('aria-busy')).toBe('true');
+    expect(fixture.get('progress-wrap').hidden).toBe(false);
+
+    pending.resolve({ blob: output, name: 'sample.pdf', pageCount: 1 });
+    await vi.waitFor(() => expect(fixture.get('save-local').disabled).toBe(false));
+    expectReady(fixture.get('download').href);
+    expect(Number(fixture.get('progress').value)).toBe(100);
+    expect(fixture.get('progress-value').textContent).toBe('100%');
+  });
+
+  it('shows a result preparation failure beside the controls and allows retrying the retained source', async () => {
+    await chooseFile();
+    vi.spyOn(URL, 'createObjectURL').mockImplementationOnce(() => { throw new Error('Blob URL allocation failed'); });
+    fixture.get('run-tool').click();
+    await vi.waitFor(() => expect(fixture.get('tool-error').hidden).toBe(false));
+
+    expectConversionFailure();
+    // Keep the alert next to the progress/actions the user is watching. The
+    // fixture reads production markup, while Node has no layout or scrolling.
+    const alertPosition = fixture.markup.indexOf('id="tool-error"');
+    expect(alertPosition).toBeGreaterThan(fixture.markup.indexOf('id="progress-wrap"'));
+    expect(alertPosition).toBeLessThan(fixture.markup.indexOf('id="work-actions"'));
+
+    fixture.get('run-tool').click();
+    await vi.waitFor(() => expect(fixture.get('save-local').disabled).toBe(false));
+    expectReady(fixture.get('download').href);
+    expect(fixture.get('tool-error').hidden).toBe(true);
+    expect(engines.wordToPdf).toHaveBeenLastCalledWith(input, expect.any(Object), expect.any(Function));
+    expect(Number(fixture.get('progress').value)).toBe(100);
+  });
+
+  it('shows a conversion rejection after engine completion without claiming 100 percent', async () => {
+    const pending = deferred<{ blob: Blob; name: string; pageCount: number }>();
+    engines.wordToPdf.mockImplementation((_file: File, _options: unknown, progress: (value: number) => void) => {
+      progress(100);
+      return pending.promise;
+    });
+    await chooseFile();
+    fixture.get('run-tool').click();
+    await vi.waitFor(() => expect(engines.wordToPdf).toHaveBeenCalledOnce());
+    expectIncomplete();
+
+    pending.reject(new Error('Late renderer cleanup failure'));
+    await vi.waitFor(() => expect(fixture.get('tool-error').hidden).toBe(false));
+    expectConversionFailure();
+  });
 
   it('keeps the completed file and both links when returning from a cached preview', async () => {
     const url = await convert();

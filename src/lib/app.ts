@@ -34,6 +34,7 @@ function initialize(root: HTMLElement) {
   const dropZone = get('drop-zone');
   const workArea = get('work-area');
   const errorBox = get('tool-error');
+  const fileErrorBox = get('file-error');
   const list = get<HTMLOListElement>('file-list');
   const grid = get('pages-grid');
   const progressWrap = get('progress-wrap');
@@ -58,6 +59,8 @@ function initialize(root: HTMLElement) {
   let resultFile: File | undefined;
   let resultShareable = false;
   let shareInFlight = false;
+  let processingFailed = false;
+  let resultOptions: string | undefined;
   let previewAbort: AbortController | undefined;
   let previewCleanup: (() => void) | undefined;
   let draggedFile: number | undefined;
@@ -67,16 +70,33 @@ function initialize(root: HTMLElement) {
   const nameStem = (name: string) => name.replace(/\.[^.]+$/, '').replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').slice(0, 100) || 'document';
   function showError(error: unknown) {
     const code = typeof error === 'string' ? error : error && typeof error === 'object' && 'code' in error ? String(error.code) : 'unknown';
-    errorBox.textContent = d.errors[code as keyof typeof d.errors] || d.errors.unknown;
-    errorBox.hidden = false;
+    const target=workArea.hidden?fileErrorBox:errorBox;
+    target.textContent = d.errors[code as keyof typeof d.errors] || d.errors.unknown;
+    target.hidden = false;
+    processingFailed = true;
+    updateDownloadShortcut();
+    target.focus({preventScroll:true});
+    target.scrollIntoView({block:'center',behavior:'auto'});
   }
-  function clearError() { errorBox.hidden = true; errorBox.textContent = ''; }
+  function clearError() {
+    for(const target of [errorBox,fileErrorBox]){target.hidden=true;target.textContent='';}
+    processingFailed=false;
+  }
+  const optionControls=Array.from(root.querySelectorAll<HTMLInputElement|HTMLSelectElement>('select,input[type=text]'));
+  const currentOptions=()=>JSON.stringify([
+    ...optionControls.map(control=>[control.getAttribute('id'),control.value]),
+    ...(tool==='pdf-to-jpg'?[['quality',get<HTMLInputElement>('quality').value]]:[]),
+  ]);
+  function invalidateChangedOptions() {
+    if(!busy&&resultUrl&&resultOptions!==currentOptions())invalidateResult();
+  }
   function updateDownloadShortcut() {
     const ready=!!resultUrl&&!busy;
     saveLocal.disabled=!ready;
     shareResult.hidden=!resultShareable;
     shareResult.disabled=!ready||shareInFlight;
     saveHint.hidden=!!resultUrl;
+    saveHint.textContent=processingFailed?d.conversionFailed:busy?d.processing:d.downloadPendingHelp;
     if(ready)saveLocal.removeAttribute('aria-describedby');
     else saveLocal.setAttribute('aria-describedby','save-local-hint');
   }
@@ -85,10 +105,12 @@ function initialize(root: HTMLElement) {
     resultUrl = undefined;
     resultFile = undefined;
     resultShareable = false;
+    resultOptions = undefined;
     download.removeAttribute('href');
     openResult.removeAttribute('href');
     saveError.textContent='';
     saveError.hidden=true;
+    progress(0);
     result.hidden = true;
     get('work-actions').hidden = false;
     updateDownloadShortcut();
@@ -125,11 +147,17 @@ function initialize(root: HTMLElement) {
     get<HTMLProgressElement>('progress').value = percent;
     get('progress-value').textContent = `${percent}%`;
   }
-  function showResult(blob: Blob, name: string) {
+  function processingProgress(value: number) {
+    // An engine's 100% does not mean its promise has settled or its result is usable.
+    progress(Math.min(99,value));
+    if(value>=100)get('progress-text').textContent=d.finishing;
+  }
+  function showResult(blob: Blob, name: string, options: string) {
     invalidateResult();
     resultUrl = URL.createObjectURL(blob);
     resultFile = createShareFile(blob,name);
     resultShareable = canShareFile(resultFile);
+    resultOptions=options;
     download.href = resultUrl;
     download.download = name;
     openResult.href = resultUrl;
@@ -137,7 +165,6 @@ function initialize(root: HTMLElement) {
     result.hidden = false;
     get('work-actions').hidden = true;
     updateDownloadShortcut();
-    download.focus();
   }
   function cleanup() {
     revision++;
@@ -272,7 +299,7 @@ function initialize(root: HTMLElement) {
     if (incoming.some(file => file.size > 50 * 1024 * 1024)) { showError('fileSize'); return; }
     if (prospective.reduce((sum,file)=>sum+file.size,0) > 100 * 1024 * 1024) { showError('totalSize'); return; }
     const current = ++revision;
-    setBusy(true); progress(0);
+    setBusy(true); progress(0); get('progress-text').textContent=d.checkingFiles;
     try {
       const engine = await import('./pdf');
       const accepted: typeof files = [];
@@ -296,7 +323,7 @@ function initialize(root: HTMLElement) {
           if (tool==='organize-pdf' && metadata.pageCount>200) throw {code:'tooManyPages'};
           accepted.push({file,count:metadata.pageCount});
         }
-        progress(Math.round((i+1)/incoming.length*100));
+        progress(Math.min(99,Math.round((i+1)/incoming.length*100)));
       }
       if (current!==revision) return;
       invalidateResult();
@@ -320,7 +347,7 @@ function initialize(root: HTMLElement) {
           const tile=grid.children[page.index];
           const area=tile?.querySelector('.page-preview');
           if(area){const img=document.createElement('img');img.src=page.url;img.alt=`${d.page} ${page.index+1}`;img.loading='lazy';img.draggable=false;area.replaceChildren(img);}
-          progress((page.index+1)/files[0]!.count*100);
+          progress(Math.min(99,(page.index+1)/files[0]!.count*100));
         },previewAbort.signal);
         if(current===revision)previewCleanup=preview.cleanup; else preview.cleanup();
       }
@@ -337,20 +364,21 @@ function initialize(root: HTMLElement) {
     clearError(); invalidateResult(); setBusy(true); progress(0);
     try {
       const engine=await import('./pdf');
+      const optionsSnapshot=currentOptions();
       let blob:Blob; let name:string;
       if(tool==='merge-pdf') {
         if(files.length<2)throw {code:'needTwo'};
-        blob=await engine.mergePdfs(files.map(entry=>entry.file),progress);name='merged.pdf';
+        blob=await engine.mergePdfs(files.map(entry=>entry.file),processingProgress);name='merged.pdf';
       } else if(tool==='organize-pdf') {
         const outputPages=pages.filter(page=>!deleted.has(page.index)&&(!extract||selected.has(page.index))).map(({index,rotation})=>({index,rotation}));
-        if(zip){const output=await engine.splitToZip(files[0]!.file,outputPages,progress);blob=output.blob;name=output.name;}
+        if(zip){const output=await engine.splitToZip(files[0]!.file,outputPages,processingProgress);blob=output.blob;name=output.name;}
         else {blob=await engine.organizePdf(files[0]!.file,outputPages);name=`${nameStem(files[0]!.file.name)}-${extract?'extracted':'edited'}.pdf`;}
       } else if(tool==='jpg-to-pdf') {
         blob=await engine.imagesToPdf(files.map(entry=>entry.file),{
           paper:get<HTMLSelectElement>('paper').value as 'a4'|'letter'|'original',
           orientation:get<HTMLSelectElement>('orientation').value as 'auto'|'portrait'|'landscape',
           margin:Number(get<HTMLSelectElement>('margin').value),fit:get<HTMLSelectElement>('fit').value as 'contain'|'cover',
-        },progress);name='images.pdf';
+        },processingProgress);name='images.pdf';
       } else if(isOffice) {
         get('progress-text').textContent=d.officeLoading;
         const options={
@@ -358,8 +386,8 @@ function initialize(root: HTMLElement) {
           range:get<HTMLInputElement>('page-range').value,
         };
         const output=tool==='word-to-pdf'
-          ?await (await import('./word')).wordToPdf(files[0]!.file,options,progress)
-          :await (await import('./office')).officeToPdf(files[0]!.file,'pptx',options,progress);
+          ?await (await import('./word')).wordToPdf(files[0]!.file,options,processingProgress)
+          :await (await import('./office')).officeToPdf(files[0]!.file,'pptx',options,processingProgress);
         blob=output.blob;name=output.name;
       } else {
         const {pdfToImages}=await import('./pdf-render');
@@ -367,11 +395,16 @@ function initialize(root: HTMLElement) {
           format:get<HTMLSelectElement>('output-format').value as 'jpg'|'png',
           scale:Number(get<HTMLSelectElement>('resolution').value),quality:Number(get<HTMLInputElement>('quality').value)/100,
           range:get<HTMLInputElement>('page-range').value,
-        },progress);blob=output.blob;name=output.name;
+        },processingProgress);blob=output.blob;name=output.name;
       }
-      if(current===revision){progress(100);showResult(blob,name);}
+      if(current===revision){
+        showResult(blob,name,optionsSnapshot);
+        setBusy(false);
+        progress(100);
+        download.focus();
+      }
     } catch(error){if(current===revision)showError(error);}
-    finally{if(current===revision){setBusy(false);get('progress-text').textContent=d.processing;}}
+    finally{if(current===revision){if(busy)setBusy(false);get('progress-text').textContent=d.processing;}}
   }
 
   get('choose-files').addEventListener('click',()=>fileInput.click());
@@ -435,12 +468,12 @@ function initialize(root: HTMLElement) {
     get('zip-pages').addEventListener('click',()=>{void run(false,true);});
   }
   if(tool==='pdf-to-jpg') {
-    get('quality').addEventListener('input',()=>{get('quality-value').textContent=`${get<HTMLInputElement>('quality').value}%`;invalidateResult();});
+    get('quality').addEventListener('input',()=>{get('quality-value').textContent=`${get<HTMLInputElement>('quality').value}%`;invalidateChangedOptions();});
     get('output-format').addEventListener('change',()=>{
-      get<HTMLInputElement>('quality').disabled=get<HTMLSelectElement>('output-format').value==='png';invalidateResult();
+      get<HTMLInputElement>('quality').disabled=get<HTMLSelectElement>('output-format').value==='png';invalidateChangedOptions();
     });
   }
-  root.querySelectorAll('select,input[type=text]').forEach(control=>control.addEventListener('change',()=>{if(!busy)invalidateResult();}));
+  optionControls.forEach(control=>control.addEventListener('change',invalidateChangedOptions));
   // Safari may cache this page while a PDF preview is open. Retain its local
   // result for Back; actual disposal/reset/replacement still releases resources.
   window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup();});

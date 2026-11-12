@@ -18,7 +18,7 @@ const accept=isOffice?d.tools[tool].accept:isImage?'image/jpeg,image/png,.jpg,.j
     <p class="helper">{isOffice?(isWord?d.officeWordHint:d.officePptHint):isImage?d.imageHint:tool==='merge-pdf'?d.mergeHint:d.singleHint}</p>
     <p class="privacy-hint"><Icon name="lock" size={15} />{d.privacyHint}</p>
   </div>
-  <div id="tool-error" class="error" role="alert" hidden></div>
+  <div id="file-error" class="error" role="alert" tabindex="-1" hidden></div>
   {isOffice && <p class="notice">{d.officeNotice}</p>}
   <div id="work-area" class="workspace" hidden>
     <div class="toolbar">
@@ -72,6 +72,7 @@ const accept=isOffice?d.tools[tool].accept:isImage?'image/jpeg,image/png,.jpg,.j
       <div class="progress-label"><span id="progress-text" role="status">{d.processing}</span><span id="progress-value">0%</span></div>
       <progress id="progress" value="0" max="100" aria-label={d.processing}></progress>
     </div>
+    <div id="tool-error" class="error" role="alert" tabindex="-1" hidden></div>
     <div class="actions" id="work-actions">
       <button id="run-tool" class="button primary" type="button">{isOffice?d.officeAction:tool==='merge-pdf'?d.mergeAction:tool==='organize-pdf'?d.organizeAction:tool==='pdf-to-jpg'?d.pdfImageAction:d.imageAction}</button>
       {tool==='organize-pdf' && <button id="extract-selected" class="button" type="button">{d.extractSelected}</button>}

@@ -69,7 +69,8 @@ export async function hangulToPdfWithRenderer(
   } catch (error) {
     throw officeError(error);
   } finally {
-    await source?.destroy();
+    try { await source?.destroy(); }
+    catch { /* Cleanup must not discard a completed PDF or replace the conversion error. */ }
   }
 }
 

@@ -129,6 +129,14 @@ for (const locale of locales) {
       }
       assert.ok(tags(html, 'button').some(tag => attribute(tag, 'id') === 'share-result'), `${path}: native file sharing action`);
       assert.ok(html.includes('id="save-error"') && html.includes('id="result-save-help"'), `${path}: saving feedback`);
+      for (const id of ['file-error', 'tool-error']) {
+        const alert = tags(html, 'div').find(tag => attribute(tag, 'id') === id);
+        assert.ok(alert, `${path}: ${id} feedback`);
+        assert.equal(attribute(alert, 'role'), 'alert', `${path}: ${id} announces failure`);
+        assert.equal(attribute(alert, 'tabindex'), '-1', `${path}: ${id} can receive focus`);
+      }
+      const errorPosition = html.indexOf('id="tool-error"');
+      assert.ok(errorPosition > html.indexOf('id="progress-wrap"') && errorPosition < html.indexOf('id="work-actions"'), `${path}: conversion errors beside processing controls`);
     }
     const indexable = isIndexableRoute(route, env.CONTACT_EMAIL);
     const links = tags(html, 'link');
